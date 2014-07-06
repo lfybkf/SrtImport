@@ -143,6 +143,7 @@ namespace SrtImport
 		public void Load(string File)
 		{
 			SetName(File);
+			ds.Clear();
 			ds.ReadXml(FileName, XmlReadMode.ReadSchema);
 			dt.AcceptChanges();
 		}//func
@@ -362,7 +363,7 @@ namespace SrtImport
 		public void Export(string Folder)
 		{
 			ExportSrt(Folder);
-			if (File.Exists(Environment.CurrentDirectory.addToPath("lyr.lyr")))
+			if (File.Exists(Folder.addToPath("make_lyr_also.txt")))
 				ExportLyr(Folder);
 		}//func
 

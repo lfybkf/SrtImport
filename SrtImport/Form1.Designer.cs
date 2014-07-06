@@ -29,17 +29,27 @@
         private void InitializeComponent()
         {
 			this.gridMain = new System.Windows.Forms.DataGridView();
-			this.panel1 = new System.Windows.Forms.Panel();
-			this.btnAll = new System.Windows.Forms.Button();
-			this.btnFix = new System.Windows.Forms.Button();
-			this.ctlFind = new System.Windows.Forms.TextBox();
-			this.btnRetime = new System.Windows.Forms.Button();
-			this.btnSave = new System.Windows.Forms.Button();
-			this.btnOpen = new System.Windows.Forms.Button();
-			this.btnExport = new System.Windows.Forms.Button();
-			this.btnImport = new System.Windows.Forms.Button();
+			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+			this.mi_file = new System.Windows.Forms.ToolStripMenuItem();
+			this.miOpen = new System.Windows.Forms.ToolStripMenuItem();
+			this.miSave = new System.Windows.Forms.ToolStripMenuItem();
+			this.miImport = new System.Windows.Forms.ToolStripMenuItem();
+			this.miExport = new System.Windows.Forms.ToolStripMenuItem();
+			this.mi_subtitles = new System.Windows.Forms.ToolStripMenuItem();
+			this.miEdit = new System.Windows.Forms.ToolStripMenuItem();
+			this.miRetime = new System.Windows.Forms.ToolStripMenuItem();
+			this.miFix = new System.Windows.Forms.ToolStripMenuItem();
+			this.miTimeClear = new System.Windows.Forms.ToolStripMenuItem();
+			this.miDelete = new System.Windows.Forms.ToolStripMenuItem();
+			this.miTimeNext = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+			this.miAll = new System.Windows.Forms.ToolStripMenuItem();
+			this.mi_other = new System.Windows.Forms.ToolStripMenuItem();
+			this.miHelp = new System.Windows.Forms.ToolStripMenuItem();
+			this.ctlFind = new System.Windows.Forms.ToolStripTextBox();
+			this.miFind = new System.Windows.Forms.ToolStripMenuItem();
 			((System.ComponentModel.ISupportInitialize)(this.gridMain)).BeginInit();
-			this.panel1.SuspendLayout();
+			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// gridMain
@@ -48,133 +58,159 @@
 			this.gridMain.AllowUserToDeleteRows = false;
 			this.gridMain.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
 			this.gridMain.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.gridMain.Location = new System.Drawing.Point(0, 0);
+			this.gridMain.Location = new System.Drawing.Point(0, 31);
 			this.gridMain.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.gridMain.Name = "gridMain";
 			this.gridMain.ReadOnly = true;
-			this.gridMain.Size = new System.Drawing.Size(699, 364);
+			this.gridMain.Size = new System.Drawing.Size(993, 370);
 			this.gridMain.TabIndex = 0;
-			this.gridMain.KeyUp += new System.Windows.Forms.KeyEventHandler(this.gridMain_KeyUp);
 			// 
-			// panel1
+			// menuStrip1
 			// 
-			this.panel1.Controls.Add(this.btnAll);
-			this.panel1.Controls.Add(this.btnFix);
-			this.panel1.Controls.Add(this.ctlFind);
-			this.panel1.Controls.Add(this.btnRetime);
-			this.panel1.Controls.Add(this.btnSave);
-			this.panel1.Controls.Add(this.btnOpen);
-			this.panel1.Controls.Add(this.btnExport);
-			this.panel1.Controls.Add(this.btnImport);
-			this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.panel1.Location = new System.Drawing.Point(0, 364);
-			this.panel1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(699, 37);
-			this.panel1.TabIndex = 1;
+			this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mi_file,
+            this.mi_subtitles,
+            this.mi_other,
+            this.ctlFind});
+			this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+			this.menuStrip1.Name = "menuStrip1";
+			this.menuStrip1.Size = new System.Drawing.Size(993, 31);
+			this.menuStrip1.TabIndex = 2;
+			this.menuStrip1.Text = "menuStrip1";
 			// 
-			// btnAll
+			// mi_file
 			// 
-			this.btnAll.Dock = System.Windows.Forms.DockStyle.Left;
-			this.btnAll.Location = new System.Drawing.Point(462, 0);
-			this.btnAll.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-			this.btnAll.Name = "btnAll";
-			this.btnAll.Size = new System.Drawing.Size(81, 37);
-			this.btnAll.TabIndex = 7;
-			this.btnAll.Text = "ALL";
-			this.btnAll.UseVisualStyleBackColor = true;
-			this.btnAll.Click += new System.EventHandler(this.btnAll_Click);
+			this.mi_file.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.miOpen,
+            this.miSave,
+            this.miImport,
+            this.miExport});
+			this.mi_file.Name = "mi_file";
+			this.mi_file.Size = new System.Drawing.Size(44, 27);
+			this.mi_file.Text = "File";
 			// 
-			// btnFix
+			// miOpen
 			// 
-			this.btnFix.Dock = System.Windows.Forms.DockStyle.Left;
-			this.btnFix.Location = new System.Drawing.Point(381, 0);
-			this.btnFix.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-			this.btnFix.Name = "btnFix";
-			this.btnFix.Size = new System.Drawing.Size(81, 37);
-			this.btnFix.TabIndex = 6;
-			this.btnFix.Text = "Fix";
-			this.btnFix.UseVisualStyleBackColor = true;
-			this.btnFix.Click += new System.EventHandler(this.btnFix_Click);
+			this.miOpen.Name = "miOpen";
+			this.miOpen.Size = new System.Drawing.Size(140, 24);
+			this.miOpen.Text = "miOpen";
+			// 
+			// miSave
+			// 
+			this.miSave.Name = "miSave";
+			this.miSave.Size = new System.Drawing.Size(140, 24);
+			this.miSave.Text = "miSave";
+			// 
+			// miImport
+			// 
+			this.miImport.Name = "miImport";
+			this.miImport.Size = new System.Drawing.Size(140, 24);
+			this.miImport.Text = "miImport";
+			// 
+			// miExport
+			// 
+			this.miExport.Name = "miExport";
+			this.miExport.Size = new System.Drawing.Size(140, 24);
+			this.miExport.Text = "miExport";
+			// 
+			// mi_subtitles
+			// 
+			this.mi_subtitles.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.miEdit,
+            this.miFind,
+            this.miRetime,
+            this.miFix,
+            this.miTimeClear,
+            this.miDelete,
+            this.miTimeNext,
+            this.toolStripSeparator1,
+            this.miAll});
+			this.mi_subtitles.Name = "mi_subtitles";
+			this.mi_subtitles.Size = new System.Drawing.Size(78, 27);
+			this.mi_subtitles.Text = "Subtitles";
+			// 
+			// miEdit
+			// 
+			this.miEdit.Name = "miEdit";
+			this.miEdit.Size = new System.Drawing.Size(211, 24);
+			this.miEdit.Text = "miEdit";
+			// 
+			// miRetime
+			// 
+			this.miRetime.Name = "miRetime";
+			this.miRetime.Size = new System.Drawing.Size(211, 24);
+			this.miRetime.Text = "miRetime";
+			// 
+			// miFix
+			// 
+			this.miFix.Name = "miFix";
+			this.miFix.Size = new System.Drawing.Size(211, 24);
+			this.miFix.Text = "miFix";
+			// 
+			// miTimeClear
+			// 
+			this.miTimeClear.Name = "miTimeClear";
+			this.miTimeClear.Size = new System.Drawing.Size(211, 24);
+			this.miTimeClear.Text = "miTimeClear";
+			// 
+			// miDelete
+			// 
+			this.miDelete.Name = "miDelete";
+			this.miDelete.Size = new System.Drawing.Size(211, 24);
+			this.miDelete.Text = "miDelete";
+			// 
+			// miTimeNext
+			// 
+			this.miTimeNext.Name = "miTimeNext";
+			this.miTimeNext.Size = new System.Drawing.Size(211, 24);
+			this.miTimeNext.Text = "miTimeNext";
+			// 
+			// toolStripSeparator1
+			// 
+			this.toolStripSeparator1.Name = "toolStripSeparator1";
+			this.toolStripSeparator1.Size = new System.Drawing.Size(208, 6);
+			// 
+			// miAll
+			// 
+			this.miAll.Name = "miAll";
+			this.miAll.Size = new System.Drawing.Size(211, 24);
+			this.miAll.Text = "miAll";
+			// 
+			// mi_other
+			// 
+			this.mi_other.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.miHelp});
+			this.mi_other.Name = "mi_other";
+			this.mi_other.Size = new System.Drawing.Size(58, 27);
+			this.mi_other.Text = "Other";
+			// 
+			// miHelp
+			// 
+			this.miHelp.Name = "miHelp";
+			this.miHelp.Size = new System.Drawing.Size(152, 24);
+			this.miHelp.Text = "miHelp";
 			// 
 			// ctlFind
 			// 
-			this.ctlFind.Dock = System.Windows.Forms.DockStyle.Right;
-			this.ctlFind.Location = new System.Drawing.Point(590, 0);
 			this.ctlFind.Name = "ctlFind";
-			this.ctlFind.Size = new System.Drawing.Size(109, 30);
-			this.ctlFind.TabIndex = 2;
-			this.ctlFind.KeyUp += new System.Windows.Forms.KeyEventHandler(this.ctlFind_KeyUp);
+			this.ctlFind.Size = new System.Drawing.Size(100, 27);
 			// 
-			// btnRetime
+			// toolStripMenuItem1
 			// 
-			this.btnRetime.Dock = System.Windows.Forms.DockStyle.Left;
-			this.btnRetime.Location = new System.Drawing.Point(300, 0);
-			this.btnRetime.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-			this.btnRetime.Name = "btnRetime";
-			this.btnRetime.Size = new System.Drawing.Size(81, 37);
-			this.btnRetime.TabIndex = 4;
-			this.btnRetime.Text = "Retime";
-			this.btnRetime.UseVisualStyleBackColor = true;
-			this.btnRetime.Click += new System.EventHandler(this.btnRetime_Click);
-			// 
-			// btnSave
-			// 
-			this.btnSave.Dock = System.Windows.Forms.DockStyle.Left;
-			this.btnSave.Location = new System.Drawing.Point(225, 0);
-			this.btnSave.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-			this.btnSave.Name = "btnSave";
-			this.btnSave.Size = new System.Drawing.Size(75, 37);
-			this.btnSave.TabIndex = 3;
-			this.btnSave.Text = "Save";
-			this.btnSave.UseVisualStyleBackColor = true;
-			this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
-			// 
-			// btnOpen
-			// 
-			this.btnOpen.Dock = System.Windows.Forms.DockStyle.Left;
-			this.btnOpen.Location = new System.Drawing.Point(155, 0);
-			this.btnOpen.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-			this.btnOpen.Name = "btnOpen";
-			this.btnOpen.Size = new System.Drawing.Size(70, 37);
-			this.btnOpen.TabIndex = 1;
-			this.btnOpen.Text = "Open";
-			this.btnOpen.UseVisualStyleBackColor = true;
-			this.btnOpen.Click += new System.EventHandler(this.btnOpen_Click);
-			// 
-			// btnExport
-			// 
-			this.btnExport.Dock = System.Windows.Forms.DockStyle.Left;
-			this.btnExport.Location = new System.Drawing.Point(78, 0);
-			this.btnExport.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-			this.btnExport.Name = "btnExport";
-			this.btnExport.Size = new System.Drawing.Size(77, 37);
-			this.btnExport.TabIndex = 5;
-			this.btnExport.Text = "Export";
-			this.btnExport.UseVisualStyleBackColor = true;
-			this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
-			// 
-			// btnImport
-			// 
-			this.btnImport.Dock = System.Windows.Forms.DockStyle.Left;
-			this.btnImport.Location = new System.Drawing.Point(0, 0);
-			this.btnImport.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-			this.btnImport.Name = "btnImport";
-			this.btnImport.Size = new System.Drawing.Size(78, 37);
-			this.btnImport.TabIndex = 0;
-			this.btnImport.Text = "Import";
-			this.btnImport.UseVisualStyleBackColor = true;
-			this.btnImport.Click += new System.EventHandler(this.btnImport_Click);
+			this.miFind.Name = "miFind";
+			this.miFind.Size = new System.Drawing.Size(211, 24);
+			this.miFind.Text = "miFind";
 			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(699, 401);
+			this.ClientSize = new System.Drawing.Size(993, 401);
 			this.Controls.Add(this.gridMain);
-			this.Controls.Add(this.panel1);
+			this.Controls.Add(this.menuStrip1);
 			this.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
 			this.KeyPreview = true;
+			this.MainMenuStrip = this.menuStrip1;
 			this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
 			this.Name = "Form1";
 			this.Text = "Form1";
@@ -182,24 +218,35 @@
 			this.Load += new System.EventHandler(this.Form1_Load);
 			this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyUp);
 			((System.ComponentModel.ISupportInitialize)(this.gridMain)).EndInit();
-			this.panel1.ResumeLayout(false);
-			this.panel1.PerformLayout();
+			this.menuStrip1.ResumeLayout(false);
+			this.menuStrip1.PerformLayout();
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
         }
 
         #endregion
 
-        private System.Windows.Forms.DataGridView gridMain;
-        private System.Windows.Forms.Panel panel1;
-				private System.Windows.Forms.Button btnImport;
-				private System.Windows.Forms.Button btnOpen;
-				private System.Windows.Forms.TextBox ctlFind;
-				private System.Windows.Forms.Button btnSave;
-				private System.Windows.Forms.Button btnRetime;
-				private System.Windows.Forms.Button btnExport;
-				private System.Windows.Forms.Button btnFix;
-				private System.Windows.Forms.Button btnAll;
+		private System.Windows.Forms.DataGridView gridMain;
+				private System.Windows.Forms.MenuStrip menuStrip1;
+				private System.Windows.Forms.ToolStripMenuItem mi_file;
+				private System.Windows.Forms.ToolStripMenuItem miOpen;
+				private System.Windows.Forms.ToolStripMenuItem miSave;
+				private System.Windows.Forms.ToolStripMenuItem miImport;
+				private System.Windows.Forms.ToolStripMenuItem miExport;
+				private System.Windows.Forms.ToolStripMenuItem mi_subtitles;
+				private System.Windows.Forms.ToolStripMenuItem miRetime;
+				private System.Windows.Forms.ToolStripMenuItem miFix;
+				private System.Windows.Forms.ToolStripMenuItem miTimeClear;
+				private System.Windows.Forms.ToolStripMenuItem miDelete;
+				private System.Windows.Forms.ToolStripMenuItem miTimeNext;
+				private System.Windows.Forms.ToolStripMenuItem miAll;
+				private System.Windows.Forms.ToolStripMenuItem mi_other;
+				private System.Windows.Forms.ToolStripMenuItem miHelp;
+				private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+				private System.Windows.Forms.ToolStripTextBox ctlFind;
+				private System.Windows.Forms.ToolStripMenuItem miEdit;
+				private System.Windows.Forms.ToolStripMenuItem miFind;
     }
 }
 

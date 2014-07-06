@@ -14,28 +14,17 @@ namespace SrtImport
 	public partial class Form1 : Form
 	{
 		Srt srt = new Srt();
-		int RowFind = 0;
+		IList<Kommand> kmds = new List<Kommand>();
+
 		public Form1()
 		{
 			InitializeComponent();
 		}
 
-		private void btnImport_Click(object sender, EventArgs e)
-		{
-			FileDialog fd = new OpenFileDialog();
-			fd.DefaultExt = "srt";
-			fd.Filter = Srt.SRV.FilterSrt;
-			fd.InitialDirectory = Environment.CurrentDirectory;
-			if (fd.ShowDialog() == DialogResult.OK)
-			{
-				srt.Import(fd.FileName);
-				srt.Save();
-				srt.Show(gridMain);
-			}//if
-		}//func
-
 		private void Form1_Load(object sender, EventArgs e)
 		{
+			InitKmd();
+
 			string[] args = Environment.GetCommandLineArgs();
 			if (args.Length > 1)
 			{
@@ -49,18 +38,18 @@ namespace SrtImport
 						path = Path.ChangeExtension(path, Srt.SRV.ExtXml);
 					}//if
 
-					Do_Open(path);
+					doOpen(path);
 				}//if
 
 				if (Directory.Exists(path))
 				{
-					Srt hObj;
+					Srt hSrt;
 					IEnumerable<string> list = Directory.EnumerateFiles(path).Where(s => s.EndsWith(Srt.SRV.ExtSrt));
 					foreach (string s in list)
 					{
-						hObj = new Srt();
-						hObj.Import(s);
-						hObj.ExportLyr(path);
+						hSrt = new Srt();
+						hSrt.Import(s);
+						hSrt.ExportLyr(path);
 					}//for
 
 					Close();
@@ -71,19 +60,31 @@ namespace SrtImport
 			}//if
 		}//func
 
-		public void Do_Help()
+		private void InitKmd()
 		{
-			frmHelp frm = new frmHelp();
-			frm.ShowDialog();
+			kmds.Add(new Kommand("Help", doHelp, Keys.F1));
+			kmds.Add(new Kommand("Open", doOpen, Keys.Control | Keys.O));
+			kmds.Add(new Kommand("Save", srt.Save, Keys.Control | Keys.S));
+			kmds.Add(new Kommand("Import", doImport, Keys.Control | Keys.I));
+			kmds.Add(new Kommand("Export", doExport, Keys.Control | Keys.E));
+			kmds.Add(new Kommand("Edit", doEdit, Keys.F2));
+			kmds.Add(new Kommand("Retime", srt.Retime, Keys.Control | Keys.R));
+			kmds.Add(new Kommand("Fix", doFix, Keys.Control | Keys.F));
+			kmds.Add(new Kommand("Delete", doDelete, Keys.F8));
+			kmds.Add(new Kommand("TimeClear", doTimeClear, Keys.Delete));
+			kmds.Add(new Kommand("TimeNext", doTimeNext, Keys.F4));
+			kmds.Add(new Kommand("Find", doFind, Keys.F3));
+			kmds.Add(new Kommand("All", Keys.Control | Keys.A).Add(srt.Retime).Add(srt.Save).Add(doExport));
+
+			foreach (Kommand kmd in kmds) { kmd.isExecuted += kmd_isExecuted; }
+ 			foreach (var mi in mi_file.DropDownItems.OfType<ToolStripItem>())	{kmds.LinkToComponent(mi);	}//for
+			foreach (var mi in mi_subtitles.DropDownItems.OfType<ToolStripItem>()) { kmds.LinkToComponent(mi); }//for
+			foreach (var mi in mi_other.DropDownItems.OfType<ToolStripItem>()) { kmds.LinkToComponent(mi); }//for
 		}//function
-
-		public void Do_Open(string FileName)
-		{
-			srt.Load(FileName);
-			srt.Show(gridMain);
-		}//func
-
-		private void btnOpen_Click(object sender, EventArgs e)
+		
+		void kmd_isExecuted(object sender, EventArgs e) { this.Text = (sender as Kommand).Caption; }
+		
+		void doOpen()
 		{
 			FileDialog fd = new OpenFileDialog();
 			fd.DefaultExt = "srt";
@@ -91,59 +92,45 @@ namespace SrtImport
 			fd.InitialDirectory = Environment.CurrentDirectory;
 			if (fd.ShowDialog() == DialogResult.OK)
 			{
-				Do_Open(fd.FileName);
+				doOpen(fd.FileName);
 			}//if
 		}//func
-
-		private void gridMain_KeyUp(object sender, KeyEventArgs e)
+		void doTimeClear() 
+		{ 
+			gridMain.CurrentRow.Cells[Srt.FLD.Tm].Value = DBNull.Value; 
+		}//function
+		void doImport()
 		{
-			if (e.KeyCode == Keys.F3)
+			FileDialog fd = new OpenFileDialog();
+			fd.DefaultExt = "srt";
+			fd.Filter = Srt.SRV.FilterSrt;
+			fd.InitialDirectory = Environment.CurrentDirectory;
+			if (fd.ShowDialog() == DialogResult.OK)
 			{
-				ctlFind.Select();
+				srt.Import(fd.FileName);
+				srt.Save();
+				srt.Show(gridMain);
 			}//if
-			else if (e.KeyCode== Keys.F2)
-			{
-				Do_Edit();
-			}//if
-			else if (e.KeyCode == Keys.F8)
-			{
-				Do_DeleteRow();
-			}//if
-			else if (e.KeyCode == Keys.Delete)
-			{
-				gridMain.CurrentRow.Cells[Srt.FLD.Tm].Value = DBNull.Value;
-			}//if
-			else if (e.KeyCode == Keys.Down && e.Alt)
-			{
-				e.Handled = Do_Tm(true);
-			}//if
-			else if (e.KeyCode == Keys.Up && e.Alt)
-			{
-				e.Handled = Do_Tm(false);
-			}//if
-
 		}//func
-
-		public bool Do_Tm(bool Next)
+		void doHelp()  
+		{	
+			frmHelp frm = new frmHelp();	frm.ShowDialog();	
+		}//function
+		void doTimeNext()
 		{
 			DataGridViewCell current_cell = gridMain.CurrentCell;
-			if (Next)
+			foreach (DataGridViewRow row in gridMain.Rows)
 			{
-				foreach (DataGridViewRow row in gridMain.Rows)
+				if (row.Index <= current_cell.RowIndex)
+					continue;
+				if (row.Index > current_cell.RowIndex && row.Cells[Srt.FLD.Tm].Value != DBNull.Value)
 				{
-					if (row.Index <= current_cell.RowIndex)
-						continue;
-					if (row.Index > current_cell.RowIndex && row.Cells[Srt.FLD.Tm].Value != DBNull.Value)
-					{
-						gridMain.CurrentCell = row.Cells[Srt.FLD.Tm];
-						break;
-					}//if
-				}//for
-			}//if
-			return true;
-		}//func
-
-		public void Do_Edit()
+					gridMain.CurrentCell = row.Cells[Srt.FLD.Tm];
+					break;
+				}//if
+			}//for
+		}//function
+		void doEdit()
 		{
 			DataGridViewRow row = gridMain.CurrentRow;
 			if (row == null)
@@ -159,70 +146,22 @@ namespace SrtImport
 				row.Cells[Srt.FLD.Tm].Value = frm.Tm;
 				row.Cells[Srt.FLD.Content].Value = frm.Content;
 			}//if
-		}//func
-
-		public void Do_Find(string s)
+		}//function
+		void doExport()
 		{
-			ctlFind.BackColor = Color.White;
-
-			string cv;
-			DataGridViewCell cell = null;
-			bool Done = false;
-
-			for (int i = RowFind; i < gridMain.RowCount; i++)
+			if (Directory.Exists(Srt.SRV.DirSrt))
 			{
-				cell = gridMain[Srt.FLD.Content, i];
-				cv = (string)cell.Value;
-				if (cv.Contains(s))
-				{
-					RowFind = i;
-					gridMain.CurrentCell = cell;
-					RowFind = (RowFind < gridMain.RowCount - 1) ? RowFind + 1 : 0;
-					Done = true;
-					break;
-				}//if
-			}//for
-
-			if (Done==false)
-			{
-				ctlFind.BackColor = Color.Red;
-				RowFind = 0;
+				srt.Export(Srt.SRV.DirSrt);
+				return;
 			}//if
-		}//func
-
-		private void ctlFind_KeyUp(object sender, KeyEventArgs e)
-		{
-			if (e.KeyCode == Keys.F3)
-			{
-				Do_Find(ctlFind.Text);
-			}//if
-			else if (e.KeyCode == Keys.Enter)
-			{
-				gridMain.Select();
-			}//if
-		}//func
-
-		private void btnSave_Click(object sender, EventArgs e)
-		{
-			srt.Save();
-		}
-
-		private void btnRetime_Click(object sender, EventArgs e)
-		{
-			srt.Retime();
-		}
-
-		private void btnExport_Click(object sender, EventArgs e)
-		{
+			
 			FolderBrowserDialog dlg = new FolderBrowserDialog();
-			dlg.SelectedPath = @"C:\Subtitles";
 			if (dlg.ShowDialog() == DialogResult.OK)
 			{
-				srt.Export(dlg.SelectedPath);				
+				srt.Export(dlg.SelectedPath);
 			}//if
-		}
-
-		private void btnFix_Click(object sender, EventArgs e)
+		}//function
+		void doFix()
 		{
 			DataGridViewRow row;
 			foreach (DataGridViewCell cell in gridMain.SelectedCells)
@@ -230,25 +169,50 @@ namespace SrtImport
 				row = cell.OwningRow;
 				row.Cells[Srt.FLD.Tm].Value = row.Cells[Srt.FLD.TmBeg].Value;
 			}//for
-		}
+		}//function
+		void doDelete()
+		{
+			int Id = (int)gridMain.getCurrent(Srt.FLD.Id);
+			srt.Delete(Id);
+		}//function
+		void doFind()
+		{
+			if (ctlFind.Focused)
+			{
+				ctlFind.BackColor = Color.White;
+				string s = ctlFind.Text;
+				DataGridViewCell cell = null;
+				bool Done = false;
+
+				for (int i = gridMain.CurrentCell.RowIndex + 1; i < gridMain.RowCount; i++)
+				{
+					cell = gridMain[Srt.FLD.Content, i];
+					if (((string)cell.Value).Contains(s))
+					{
+						gridMain.CurrentCell = cell;
+						Done = true;
+						break;
+					}//if
+				}//for
+				ctlFind.BackColor = Done ? Color.White : Color.Red;
+			}//if
+			else
+			{
+				ctlFind.Focus();
+				ctlFind.BackColor = Color.Yellow;
+			}
+		}//func
+	
+		
+		public void doOpen(string FileName)
+		{
+			srt.Load(FileName);
+			srt.Show(gridMain);
+		}//func
 
 		private void Form1_KeyUp(object sender, KeyEventArgs e)
 		{
-			if (e.KeyCode == Keys.F1)
-				Do_Help();
-			else if (e.KeyCode == Keys.Escape)
-				gridMain.Select();
-			else if (e.Control)
-			{
-				if (e.KeyCode == Keys.R)
-					btnRetime_Click(this, null);
-				else if (e.KeyCode == Keys.S)
-					btnSave_Click(this, null);
-				else if (e.KeyCode == Keys.E)
-					btnExport_Click(this, null);
-				else if (e.KeyCode == Keys.F)
-					btnFix_Click(this, null);
-			}//if
+			if (e.KeyCode == Keys.Escape) { gridMain.Focus();}
 		}//func
 
 		private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -260,17 +224,5 @@ namespace SrtImport
 			}//if
 		}//func
 
-		public void Do_DeleteRow()
-		{
-			int Id = (int)gridMain.getCurrent(Srt.FLD.Id);
-			srt.Delete(Id);
-		}
-
-		private void btnAll_Click(object sender, EventArgs e)
-		{
-			btnRetime_Click(sender, e);
-			btnSave_Click(sender, e);
-			btnExport_Click(sender, e);
-		}//func
   }//class
 }

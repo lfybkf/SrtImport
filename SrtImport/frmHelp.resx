@@ -123,15 +123,7 @@ file.srt - convert to xml and open
 folder - convert all .srt to .lyr and close
 ==============
 form.Escape - goto grid
-form.RSEF - click buttons with first letter
 ================
-grid.F2 - edit
-grid.F3 - find
-grid.F8 - delete row
-grid.Delete - delete time
-grid.Alt+UpDown - goto next cell with time
-================
-find.F3 - find
-find.Enter - goto grid</value>
+place file "make_lyr_also.txt" to export dir  - there will be lyrics</value>
   </data>
 </root>
