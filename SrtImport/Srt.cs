@@ -14,16 +14,8 @@ namespace SrtImport
 		public int Beg;
 		public int End;
 
-		public Ival(int beg, int end)
-		{
-			Beg = beg;
-			End = end;
-		}
-
-		public bool IsSimple
-		{
-			get { return (End == Beg + 1); }
-		}//func
+		public Ival(int beg, int end)		{			Beg = beg;			End = end;		}
+		public bool IsSimple		{			get { return (End == Beg + 1); }		}//func
 	}//struct
 
 	public class Srt
@@ -85,10 +77,7 @@ namespace SrtImport
 
 		public static string SrtDur(TimeSpan ts)
 		{
-			return string.Format(SRV.FmtTmSrt
-				, ts.Minutes.ToString("D2")
-				, ts.Seconds.ToString("D2")
-				);
+			return SRV.FmtTmSrt.fmt(ts.Minutes.ToString("D2"), ts.Seconds.ToString("D2"));
 		}//func
 
 		public static DateTime Convert(TimeSpan ts)
@@ -278,9 +267,9 @@ namespace SrtImport
 
 			foreach (DataRow dr in dt.Rows)
 			{
-				if ((int)dr[FLD.Id] <= ival.Beg)
+				if (dr.Field<int>(FLD.Id) <= ival.Beg)
 					continue;
-				if ((int)dr[FLD.Id] >= ival.End)
+				if (dr.Field<int>(FLD.Id) >= ival.End)
 					break;
 
 				TmBeg = (TimeSpan)dr[FLD.TmBeg];

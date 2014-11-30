@@ -130,6 +130,7 @@ namespace SrtImport
 				}//if
 			}//for
 		}//function
+
 		void doEdit()
 		{
 			DataGridViewRow row = gridMain.CurrentRow;
