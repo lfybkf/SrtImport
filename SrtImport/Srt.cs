@@ -4,23 +4,26 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using BDB;
 
 namespace SrtImport
 {
-	public class Ival
-	{
-		public int Beg;
-		public int End;
-
-		public Ival(int beg, int end)		{			Beg = beg;			End = end;		}
-		public bool IsSimple		{			get { return (End == Beg + 1); }		}//func
-	}//struct
 
 	public class Srt
 	{
 		enum Section {Period, Content, End }
+
+		public class Ival
+		{
+			public int Beg;
+			public int End;
+
+			public Ival(int beg, int end) { Beg = beg; End = end; }
+			public bool IsSimple { get { return (End == Beg + 1); } }
+		}//struct
+
 		public class FLD
 		{
 			public static readonly string Id = "Id";
@@ -38,28 +41,36 @@ namespace SrtImport
 			public static readonly string Zpt = ",";
 			public static readonly string Point = ".";
 			public static readonly string Space = " ";
+			public static readonly string FilterLyr = "Lyrics (*.lrc)|*.lrc";
 			public static readonly string FilterSrt = "Subtitles (*.srt)|*.srt";
 			public static readonly string FilterXml = "XmlSubtitles (*.xml)|*.xml";
 			public static readonly string FmtGrid = "hh:mm:ss";
-			public static readonly string FmtTmSrt = "{0}:{1}:{2},{3}";
-			public static readonly string FmtTmLyr = "{0}:{1}.{2}";
-			public static readonly string FmtDurSrt = "{0}:{1}";
+			public static readonly string FmtSrtTm = "{0}:{1}:{2},{3}";
+			public static readonly string FmtSrtDur = "{0}:{1}";
+			public static readonly string FmtLyrTm = "{0}:{1}.{2}";
+			public static readonly string FmtLyrPar = "[{0}:{1}]";
 
 			public static readonly string ExtXml = ".xml";
 			public static readonly string ExtSrt = ".srt";
 			public static readonly string ExtLyr = ".lrc";
 
-			public static string DirSrt = @"C:\Subtitles";
-			public static string DirLyr = @"C:\Subtitles";
+			public static string DirSrt = @"C:\Temp";
+			public static string DirLyr = @"C:\Temp";
+
+			public static string none = "none";
+			public static string Key = "Key";
+			public static string Value = "Value";
 		}//class
 
 		DataTable dt = new DataTable("Srt");
 		DataSet ds = new DataSet("Movie");
 		string Name;
+		Dictionary<string, string> param = new Dictionary<string, string>();
+		static readonly string[] LyrPar = { "ti", "ar", "al"};
 
 		public static string SrtTS(TimeSpan ts)
 		{
-			return SRV.FmtTmSrt.fmt(
+			return SRV.FmtSrtTm.fmt(
 				ts.Hours.ToString("D2")
 				, ts.Minutes.ToString("D2")
 				, ts.Seconds.ToString("D2")
@@ -68,25 +79,25 @@ namespace SrtImport
 
 		public static string LyrTS(TimeSpan ts)
 		{
-			return string.Format(SRV.FmtTmLyr
+			return string.Format(SRV.FmtLyrTm
 				, ts.Minutes.ToString("D2")
 				, ts.Seconds.ToString("D2")
 				, (ts.Milliseconds/10).ToString("D2"));
 		}//func
 
 
-		public static string SrtDur(TimeSpan ts)
+		private static string SrtDur(TimeSpan ts)
 		{
-			return SRV.FmtTmSrt.fmt(ts.Minutes.ToString("D2"), ts.Seconds.ToString("D2"));
+			return SRV.FmtSrtTm.fmt(ts.Minutes.ToString("D2"), ts.Seconds.ToString("D2"));
 		}//func
 
-		public static DateTime Convert(TimeSpan ts)
+		private static DateTime Convert(TimeSpan ts)
 		{
 			DateTime dt = new DateTime(2000,1,1);
 			return dt + ts;
 		}//func
 
-		public static TimeSpan Convert(DateTime dt)
+		private static TimeSpan Convert(DateTime dt)
 		{
 			TimeSpan Ret = dt - new DateTime(2000, 1, 1);
 			return Ret;
@@ -137,9 +148,57 @@ namespace SrtImport
 			dt.AcceptChanges();
 		}//func
 
-		public void Import(string File)
+		public void Import(string path)
 		{
-			SetName(File);
+			SetName(path);
+			if (path.EndsWith(Srt.SRV.ExtSrt))
+				ImportSrt(path);
+			else if (path.EndsWith(Srt.SRV.ExtLyr))
+				ImportLyr(path);
+		}
+
+		private void ImportLyr(string path)
+		{
+			using (TextReader tr = new StreamReader(path, SRV.enc))
+			{
+				string s, Value, Min, Sec;
+				int Num;
+				TimeSpan Tm;
+				DataRow dr = null;
+				Regex rexPar = new Regex(@"\[(?<Key>\D+):(?<Value>\D+)\].*");
+				Regex rexOne = new Regex(@"\[(?<Min>[0-9]{2}):(?<Sec>[0-9]{2})\.[0-9]{2}\](?<Value>.+)");
+				Match m = null;
+				while ((s = tr.ReadLine()) != null)
+				{
+					if (string.IsNullOrWhiteSpace(s))
+						continue;
+
+					if (rexPar.IsMatch(s))
+					{
+						m = rexPar.Match(s);
+						param[m.Groups[SRV.Key].Value] = m.Groups[SRV.Value].Value;
+					}//if
+					else if (rexOne.IsMatch(s))
+					{
+						m = rexOne.Match(s);
+						Value = m.Groups[SRV.Value].Value;
+						Min = m.Groups["Min"].Value;
+						Sec = m.Groups["Sec"].Value;
+						Tm = new TimeSpan(0, Min.ToInt(), Sec.ToInt());
+						
+						dr = dt.NewRow();
+						dr[FLD.Content] = Value;
+						dr[FLD.TmBeg] = Tm;
+						dr[FLD.TmEnd] = Tm;
+						dt.Rows.Add(dr);
+					}//if
+
+				}//while
+			}//using
+		}//function
+
+		public void ImportSrt(string File)
+		{
 			using (TextReader tr = new StreamReader(File, SRV.enc))
 			{
 				string s;
@@ -310,7 +369,7 @@ namespace SrtImport
 			SetBounds();
 		}//func
 
-		public void ExportSrt(string Folder)
+		private void ExportSrt(string Folder)
 		{
 			string path = Folder.addToPath(Name) + SRV.ExtSrt;
 			StringBuilder sb = new StringBuilder();
@@ -330,13 +389,14 @@ namespace SrtImport
 			File.WriteAllText(path, sb.ToString(), SRV.enc);
 		}//func
 
-		public void ExportLyr(string Folder)
+		internal void ExportLyr(string Folder)
 		{
 			string path = Path.Combine(Folder, Name) + SRV.ExtLyr;
 			StringBuilder sb = new StringBuilder();
-			sb.AppendLine("[ti:{0}]".fmt(Name));
-			sb.AppendLine("[ar:none]");
-			sb.AppendLine("[al:none]");
+			foreach (var s in LyrPar)
+			{
+				sb.AppendLine(SRV.FmtLyrPar.fmt(s, param.ContainsKey(s) ? param[s] : Name ));	
+			}//for
 			sb.AppendLine("[la:en]");
 			sb.AppendLine("[by:BDB]");
 			foreach (DataRow dr in dt.Rows)
@@ -352,21 +412,22 @@ namespace SrtImport
 		public void Export(string Folder)
 		{
 			ExportSrt(Folder);
-			if (File.Exists(Folder.addToPath("make_lyr_also.txt")))
-				ExportLyr(Folder);
+			//if (File.Exists(Folder.addToPath("make_lyr_also.txt")))
+			ExportLyr(Folder);	
 		}//func
 
-		static string LyrStr(string s)
-		{
-			return s.Replace(Environment.NewLine, SRV.Space);
-		}//func
+		static string LyrStr(string s)	{	return s.Replace(Environment.NewLine, SRV.Space);	}//func
 
-		public bool IsChanged
+		public bool IsChanged	{	get	{	return dt.AsEnumerable().Any(dr => dr.RowState == DataRowState.Modified);	}	}
+	}//class
+
+	public static class LocalExtension
+	{
+		public static int ToInt(this string s)
 		{
-			get
-			{
-				return dt.AsEnumerable().Any(dr => dr.RowState == DataRowState.Modified);
-			}
-		}//func
+			int result;
+			if (int.TryParse(s, out result) == false)			{				return default(int);			}//if
+			return result;
+		}//function
 	}//class
 }//ns
