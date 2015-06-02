@@ -17,11 +17,11 @@ namespace SrtImport
 
 		public class Ival
 		{
-			public int Beg;
-			public int End;
+			public int BegID;
+			public int EndID;
 
-			public Ival(int beg, int end) { Beg = beg; End = end; }
-			public bool IsSimple { get { return (End == Beg + 1); } }
+			public Ival(int beg, int end) { BegID = beg; EndID = end; }
+			public bool IsSimple { get { return (EndID == BegID + 1); } }
 		}//struct
 
 		public class FLD
@@ -29,7 +29,6 @@ namespace SrtImport
 			public static readonly string Id = "Id";
 			public static readonly string TmBeg = "TmBeg";
 			public static readonly string TmEnd = "TmEnd";
-			public static readonly string Dur = "Dur";
 			public static readonly string Content = "Content";
 			public static readonly string Tm = "Tm";
 		}//class
@@ -68,33 +67,9 @@ namespace SrtImport
 		Dictionary<string, string> param = new Dictionary<string, string>();
 		static readonly string[] LyrPar = { "ti", "ar", "al"};
 
-		public static string SrtTS(TimeSpan ts)
-		{
-			return SRV.FmtSrtTm.fmt(
-				ts.Hours.ToString("D2")
-				, ts.Minutes.ToString("D2")
-				, ts.Seconds.ToString("D2")
-				, ts.Milliseconds.ToString("D3"));
-		}//func
-
-		public static string LyrTS(TimeSpan ts)
-		{
-			return string.Format(SRV.FmtLyrTm
-				, ts.Minutes.ToString("D2")
-				, ts.Seconds.ToString("D2")
-				, (ts.Milliseconds/10).ToString("D2"));
-		}//func
-
-
 		private static string SrtDur(TimeSpan ts)
 		{
 			return SRV.FmtSrtTm.fmt(ts.Minutes.ToString("D2"), ts.Seconds.ToString("D2"));
-		}//func
-
-		private static DateTime Convert(TimeSpan ts)
-		{
-			DateTime dt = new DateTime(2000,1,1);
-			return dt + ts;
 		}//func
 
 		private static TimeSpan Convert(DateTime dt)
@@ -162,8 +137,8 @@ namespace SrtImport
 			using (TextReader tr = new StreamReader(path, SRV.enc))
 			{
 				string s, Value, Min, Sec;
-				int Num;
-				TimeSpan Tm;
+				TimeSpan TmBeg, TmEnd;
+				TimeSpan TmDuration = new TimeSpan(0, 0, 5);
 				DataRow dr = null;
 				Regex rexPar = new Regex(@"\[(?<Key>\D+):(?<Value>\D+)\].*");
 				Regex rexOne = new Regex(@"\[(?<Min>[0-9]{2}):(?<Sec>[0-9]{2})\.[0-9]{2}\](?<Value>.+)");
@@ -184,12 +159,13 @@ namespace SrtImport
 						Value = m.Groups[SRV.Value].Value;
 						Min = m.Groups["Min"].Value;
 						Sec = m.Groups["Sec"].Value;
-						Tm = new TimeSpan(0, Min.ToInt(), Sec.ToInt());
+						TmBeg = new TimeSpan(0, Min.ToInt(), Sec.ToInt());
+						TmEnd = TmBeg.Add(TmDuration);
 						
 						dr = dt.NewRow();
 						dr[FLD.Content] = Value;
-						dr[FLD.TmBeg] = Tm;
-						dr[FLD.TmEnd] = Tm;
+						dr[FLD.TmBeg] = TmBeg;
+						dr[FLD.TmEnd] = TmEnd;
 						dt.Rows.Add(dr);
 					}//if
 
@@ -271,22 +247,22 @@ namespace SrtImport
 			Ival Ret = null;
 			int IdStart, IdBeg = 0, IdEnd = 0;
 
-			IdStart = (from == null) ? 0 : from.End;
+			IdStart = (from == null) ? 0 : from.EndID;
 
 			foreach (DataRow dr in dt.Rows)
 			{
-				if ((int)dr[FLD.Id] < IdStart)
+				if (dr.ID() < IdStart)
 					continue;
 
 				if (IdBeg == 0 && dr[FLD.Tm] != DBNull.Value)
 				{
-					IdBeg = (int)dr[FLD.Id];
+					IdBeg = dr.ID();
 					continue;
 				}//if
 
 				if (IdBeg > 0 && dr[FLD.Tm] != DBNull.Value)
 				{
-					IdEnd = (int)dr[FLD.Id];
+					IdEnd = dr.ID();
 					break;
 				}//if
 			}//for
@@ -295,29 +271,15 @@ namespace SrtImport
 			return Ret;
 		}//func
 
-		void SetBounds()
-		{
-			TimeSpan Tm, TmDur;
-			foreach (DataRow dr in dt.Rows)
-			{
-				if (dr[FLD.Tm] == DBNull.Value)
-					continue;
-				Tm =	(TimeSpan)dr[FLD.Tm];
-				TmDur = SelectDuration(dr);
-				dr[FLD.TmBeg] = Tm;
-				dr[FLD.TmEnd] = Tm + TmDur;
-			}//for
-		}//func
-
 		void Retime(Ival ival)
 		{
 			if (ival.IsSimple)
 				return;
 
-			TimeSpan TmEndNeed = (TimeSpan)dt.Rows.Find(ival.End)[FLD.Tm];
-			TimeSpan TmBegNeed = (TimeSpan)dt.Rows.Find(ival.Beg)[FLD.Tm];
-			TimeSpan TmEndReal = (TimeSpan)dt.Rows.Find(ival.End)[FLD.TmBeg];
-			TimeSpan TmBegReal = (TimeSpan)dt.Rows.Find(ival.Beg)[FLD.TmBeg];
+			TimeSpan TmEndNeed = dt.Rows.Find(ival.EndID).Tm();
+			TimeSpan TmBegNeed = dt.Rows.Find(ival.BegID).Tm();
+			TimeSpan TmEndReal = dt.Rows.Find(ival.EndID).TmBeg();
+			TimeSpan TmBegReal = dt.Rows.Find(ival.BegID).TmBeg();
 			TimeSpan TmDiffNeed, TmDiffReal, TmBeg, TmDur;
 			long Need = (TmEndNeed - TmBegNeed).Ticks;
 			long Real = (TmEndReal - TmBegReal).Ticks;
@@ -326,38 +288,22 @@ namespace SrtImport
 
 			foreach (DataRow dr in dt.Rows)
 			{
-				if (dr.Field<int>(FLD.Id) <= ival.Beg)
+				if (dr.ID() <= ival.BegID)
 					continue;
-				if (dr.Field<int>(FLD.Id) >= ival.End)
+				if (dr.ID() >= ival.EndID)
 					break;
 
-				TmBeg = (TimeSpan)dr[FLD.TmBeg];
-				TmDur = SelectDuration(dr);
+				TmBeg = dr.TmBeg();
+				TmDur = dr.TmDur();
 
 				TmDiffReal = TmBeg - TmBegReal;
 				TmDiffNeed = new TimeSpan((long)(TmDiffReal.Ticks * K));
-				dr[FLD.TmBeg] = TmBegNeed + TmDiffNeed;
+				dr[FLD.TmBeg] = (TmBegNeed + TmDiffNeed).RoundToSec();
 				UpdateDuration(dr, TmDur);
 
 			}//for
 		}//func
 
-		static void UpdateDuration(DataRow dr, TimeSpan TmDur)
-		{
-			dr[FLD.TmEnd] = (TimeSpan)dr[FLD.TmBeg] + TmDur;
-		}//func
-
-		static TimeSpan SelectDuration(DataRow dr)
-		{
-			return (TimeSpan)dr[FLD.TmEnd] - (TimeSpan)dr[FLD.TmBeg];
-		}//func
-
-		public void Delete(int aId)
-		{
-			DataRow dr = dt.Rows.Find(aId);
-			if (dr != null)
-				dt.Rows.Remove(dr);
-		}//func
 
 		public void Retime()
 		{
@@ -366,7 +312,27 @@ namespace SrtImport
 			{
 				Retime(ival);
 			}//while
-			SetBounds();
+			#region Align to Tm
+			TimeSpan Tm, TmDur;
+			var rows = dt.AsEnumerable().Where(r => r[FLD.Tm] != DBNull.Value);
+			foreach (DataRow dr in rows)
+			{
+				Tm = dr.Tm();
+				TmDur = dr.TmDur();
+				dr[FLD.TmBeg] = Tm;
+				dr[FLD.TmEnd] = (Tm + TmDur).RoundToSec();
+			}//for
+			#endregion
+
+			#region AlignTmEnd
+			DataRow drCurrent, drNext;
+			for (int i = 0; i < dt.Rows.Count - 1; i++)
+			{
+				drCurrent = dt.Rows[i];
+				drNext = dt.Rows[i + 1];
+				if (drCurrent.TmEnd() > drNext.TmBeg()) { drCurrent[FLD.TmEnd] = drNext.TmBeg(); }//if
+			}//for
+			#endregion
 		}//func
 
 		private void ExportSrt(string Folder)
@@ -377,12 +343,12 @@ namespace SrtImport
 			{
 				sb.AppendLine(dr[FLD.Id].ToString());
 				sb.AppendFormat("{0} {1} {2}",
-					(SrtTS((TimeSpan)dr[FLD.TmBeg]))
+					(dr.TmBeg().ToSrt())
 					, SRV.Delim
-					, SrtTS((TimeSpan)dr[FLD.TmEnd])
+					, dr.TmEnd().ToSrt()
 					);
 				sb.AppendLine(string.Empty);
-				sb.AppendLine(dr[FLD.Content].ToString());
+				sb.AppendLine(dr.Content());
 				sb.AppendLine(string.Empty);
 			}//for
 
@@ -401,9 +367,7 @@ namespace SrtImport
 			sb.AppendLine("[by:BDB]");
 			foreach (DataRow dr in dt.Rows)
 			{
-				sb.AppendFormat("[{0}]{1}",
-					(LyrTS((TimeSpan)dr[FLD.TmBeg]))
-					, LyrStr((string)dr[FLD.Content]));
+				sb.AppendFormat("[{0}]{1}", dr.TmBeg().ToLyr(), LyrStr(dr.Content()));
 				sb.AppendLine(string.Empty);
 			}//for
 			File.WriteAllText(path, sb.ToString(), SRV.enc);
@@ -412,13 +376,14 @@ namespace SrtImport
 		public void Export(string Folder)
 		{
 			ExportSrt(Folder);
-			//if (File.Exists(Folder.addToPath("make_lyr_also.txt")))
 			ExportLyr(Folder);	
 		}//func
 
 		static string LyrStr(string s)	{	return s.Replace(Environment.NewLine, SRV.Space);	}//func
-
 		public bool IsChanged	{	get	{	return dt.AsEnumerable().Any(dr => dr.RowState == DataRowState.Modified);	}	}
+		static void UpdateDuration(DataRow dr, TimeSpan TmDur) { dr[FLD.TmEnd] = dr.TmBeg() + TmDur; }//func
+		public void Delete(int aId) { dt.Rows.Find(aId).execute(dr => dt.Rows.Remove(dr)); }//func
+
 	}//class
 
 	public static class LocalExtension
@@ -429,5 +394,33 @@ namespace SrtImport
 			if (int.TryParse(s, out result) == false)			{				return default(int);			}//if
 			return result;
 		}//function
+
+		public static TimeSpan RoundToSec(this TimeSpan ts)		{	return new TimeSpan(ts.Hours, ts.Minutes, ts.Seconds);	}//func
+		private static DateTime ToDateTime(this TimeSpan ts)		{	return new DateTime(2000, 1, 1).Add(ts);	}//func
+
+		public static string ToSrt(this TimeSpan ts)
+		{
+			return Srt.SRV.FmtSrtTm.fmt(
+				ts.Hours.ToString("D2")
+				, ts.Minutes.ToString("D2")
+				, ts.Seconds.ToString("D2")
+				, ts.Milliseconds.ToString("D3"));
+		}//func
+
+		public static string ToLyr(this TimeSpan ts)
+		{
+			return Srt.SRV.FmtLyrTm.fmt(
+				ts.Minutes.ToString("D2")
+				, ts.Seconds.ToString("D2")
+				, (ts.Milliseconds / 10).ToString("D2"));
+		}//func
+
+		public static TimeSpan TmBeg(this DataRow dr)	{	return dr.Field<TimeSpan>(Srt.FLD.TmBeg);	}
+		public static TimeSpan TmEnd(this DataRow dr) { return dr.Field<TimeSpan>(Srt.FLD.TmEnd); }
+		public static TimeSpan Tm(this DataRow dr) { return dr.Field<TimeSpan>(Srt.FLD.Tm); }
+		public static TimeSpan TmDur(this DataRow dr) { return dr.TmEnd() - dr.TmBeg(); }
+		public static int ID(this DataRow dr) { return dr.Field<int>(Srt.FLD.Id); }
+		public static string Content(this DataRow dr) { return dr.Field<string>(Srt.FLD.Content); }
+
 	}//class
 }//ns
