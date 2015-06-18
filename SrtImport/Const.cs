@@ -15,9 +15,10 @@ namespace SrtImport
 		public static readonly string Tm = "Tm";
 	}//class
 
-	public class SRV
+	public static class SRV
 	{
 		public static Encoding encoding = Encoding.GetEncoding(1251);
+		public static TimeSpan TmDurMin = new TimeSpan(0,0,5);
 		public static readonly string Delim = "-->";
 		public static readonly string Zpt = ",";
 		public static readonly string Point = ".";

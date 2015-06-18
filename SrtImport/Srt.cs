@@ -290,6 +290,7 @@ namespace SrtImport
 			{
 				Tm = dr.Tm();
 				TmDur = dr.TmDur();
+				TmDur = (TmDur < SRV.TmDurMin) ? SRV.TmDurMin : TmDur;
 				dr[FLD.TmBeg] = Tm;
 				dr[FLD.TmEnd] = (Tm + TmDur).RoundToSec();
 			}//for
@@ -347,12 +348,19 @@ namespace SrtImport
 					}//while
 				}//using
 
-				string withTrn = "{0}({1}) ";
+				string withTrn = " {0}({1})";
+				string[] ends = { SRV.Space, SRV.Point, SRV.Zpt};
 				foreach (var key in Trn.Keys)
 				{
-					sEng = key + SRV.Space; //чтобы заменять не "word", а "word ". Иначе будут проблемы с "wordish"
-					sRus = withTrn.fmt(key, Trn[key]);
-					sAll = sAll.Replace(sEng, sRus);
+					foreach (var end in ends)
+					{
+						sEng = SRV.Space.add(key, end); //чтобы заменять не "word", а " word ". Иначе будут проблемы с "wordish"
+						if (sAll.Contains(sEng))
+						{
+							sRus = withTrn.fmt(key, Trn[key]) + end;
+							sAll = sAll.Replace(sEng, sRus);
+						}//if
+					}//for
 				}//for
 
 			}//if
