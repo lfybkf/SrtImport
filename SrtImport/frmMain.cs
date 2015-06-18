@@ -31,11 +31,11 @@ namespace SrtImport
 				string path = args[1];
 				if (File.Exists(path))
 				{
-					if (path.EndsWith(Srt.SRV.ExtXml) == false)
+					if (path.EndsWith(EXT.Xml) == false)
 				{
 						srt.Import(path);
 						srt.Save();
-						path = Path.ChangeExtension(path, Srt.SRV.ExtXml);
+						path = Path.ChangeExtension(path, EXT.Xml);
 				}//if
 
 					doOpen(path);
@@ -44,7 +44,7 @@ namespace SrtImport
 				if (Directory.Exists(path))
 				{
 					Srt hSrt;
-					IEnumerable<string> list = Directory.EnumerateFiles(path).Where(s => s.EndsWith(Srt.SRV.ExtSrt));
+					IEnumerable<string> list = Directory.EnumerateFiles(path).Where(s => s.EndsWith(EXT.Srt));
 					foreach (string s in list)
 					{
 						hSrt = new Srt();
@@ -88,7 +88,7 @@ namespace SrtImport
 		{
 			FileDialog fd = new OpenFileDialog();
 			fd.DefaultExt = "srt";
-			fd.Filter = Srt.SRV.FilterXml;
+			fd.Filter = FILTER.Xml;
 			fd.InitialDirectory = Environment.CurrentDirectory;
 			if (fd.ShowDialog() == DialogResult.OK)
 			{
@@ -97,13 +97,14 @@ namespace SrtImport
 		}//func
 		void doTimeClear() 
 		{ 
-			gridMain.CurrentRow.Cells[Srt.FLD.Tm].Value = DBNull.Value; 
+			gridMain.CurrentRow.Cells[FLD.Tm].Value = DBNull.Value; 
 		}//function
+
 		void doImport()
 		{
 			FileDialog fd = new OpenFileDialog();
 			fd.DefaultExt = "srt";
-			fd.Filter = Srt.SRV.FilterSrt;
+			fd.Filter = FILTER.Srt;
 			fd.InitialDirectory = Environment.CurrentDirectory;
 			if (fd.ShowDialog() == DialogResult.OK)
 			{
@@ -123,9 +124,9 @@ namespace SrtImport
 			{
 				if (row.Index <= current_cell.RowIndex)
 					continue;
-				if (row.Index > current_cell.RowIndex && row.Cells[Srt.FLD.Tm].Value != DBNull.Value)
+				if (row.Index > current_cell.RowIndex && row.Cells[FLD.Tm].Value != DBNull.Value)
 				{
-					gridMain.CurrentCell = row.Cells[Srt.FLD.Tm];
+					gridMain.CurrentCell = row.Cells[FLD.Tm];
 					break;
 				}//if
 			}//for
@@ -138,21 +139,21 @@ namespace SrtImport
 				return;
 
 			frmEdit frm = new frmEdit();
-			object oTm = row.Cells[Srt.FLD.Tm].Value;
-			TimeSpan TmBeg = (TimeSpan)row.Cells[Srt.FLD.TmBeg].Value;
+			object oTm = row.Cells[FLD.Tm].Value;
+			TimeSpan TmBeg = (TimeSpan)row.Cells[FLD.TmBeg].Value;
 			frm.Tm = (oTm == DBNull.Value) ? TmBeg : (TimeSpan)oTm;
-			frm.Content = (string)row.Cells[Srt.FLD.Content].Value;
+			frm.Content = (string)row.Cells[FLD.Content].Value;
 			if (frm.ShowDialog() == DialogResult.OK)
 			{
-				row.Cells[Srt.FLD.Tm].Value = frm.Tm;
-				row.Cells[Srt.FLD.Content].Value = frm.Content;
+				row.Cells[FLD.Tm].Value = frm.Tm;
+				row.Cells[FLD.Content].Value = frm.Content;
 			}//if
 		}//function
 		void doExport()
 		{
-			if (Directory.Exists(Srt.SRV.DirSrt))
+			if (Directory.Exists(DIR.Srt))
 			{
-				srt.Export(Srt.SRV.DirSrt);
+				srt.Export(DIR.Srt);
 				return;
 			}//if
 			
@@ -168,12 +169,12 @@ namespace SrtImport
 			foreach (DataGridViewCell cell in gridMain.SelectedCells)
 			{
 				row = cell.OwningRow;
-				row.Cells[Srt.FLD.Tm].Value = row.Cells[Srt.FLD.TmBeg].Value;
+				row.Cells[FLD.Tm].Value = row.Cells[FLD.TmBeg].Value;
 			}//for
 		}//function
 		void doDelete()
 		{
-			int Id = (int)gridMain.getCurrent(Srt.FLD.Id);
+			int Id = (int)gridMain.getCurrent(FLD.Id);
 			srt.Delete(Id);
 		}//function
 		void doFind()
@@ -187,7 +188,7 @@ namespace SrtImport
 
 				for (int i = gridMain.CurrentCell.RowIndex + 1; i < gridMain.RowCount; i++)
 				{
-					cell = gridMain[Srt.FLD.Content, i];
+					cell = gridMain[FLD.Content, i];
 					if (((string)cell.Value).Contains(s))
 					{
 						gridMain.CurrentCell = cell;

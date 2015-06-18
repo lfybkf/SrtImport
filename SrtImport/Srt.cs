@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
 using BDB;
 
 namespace SrtImport
@@ -24,43 +23,6 @@ namespace SrtImport
 			public bool IsSimple { get { return (EndID == BegID + 1); } }
 		}//struct
 
-		public class FLD
-		{
-			public static readonly string Id = "Id";
-			public static readonly string TmBeg = "TmBeg";
-			public static readonly string TmEnd = "TmEnd";
-			public static readonly string Content = "Content";
-			public static readonly string Tm = "Tm";
-		}//class
-
-		public class SRV
-		{
-			public static Encoding enc = Encoding.GetEncoding(1251);
-			public static readonly string Delim = "-->";
-			public static readonly string Zpt = ",";
-			public static readonly string Point = ".";
-			public static readonly string Space = " ";
-			public static readonly string FilterLyr = "Lyrics (*.lrc)|*.lrc";
-			public static readonly string FilterSrt = "Subtitles (*.srt)|*.srt";
-			public static readonly string FilterXml = "XmlSubtitles (*.xml)|*.xml";
-			public static readonly string FmtGrid = "hh:mm:ss";
-			public static readonly string FmtSrtTm = "{0}:{1}:{2},{3}";
-			public static readonly string FmtSrtDur = "{0}:{1}";
-			public static readonly string FmtLyrTm = "{0}:{1}.{2}";
-			public static readonly string FmtLyrPar = "[{0}:{1}]";
-
-			public static readonly string ExtXml = ".xml";
-			public static readonly string ExtSrt = ".srt";
-			public static readonly string ExtLyr = ".lrc";
-
-			public static string DirSrt = @"C:\Temp";
-			public static string DirLyr = @"C:\Temp";
-
-			public static string none = "none";
-			public static string Key = "Key";
-			public static string Value = "Value";
-		}//class
-
 		DataTable dt = new DataTable("Srt");
 		DataSet ds = new DataSet("Movie");
 		string Name;
@@ -69,7 +31,7 @@ namespace SrtImport
 
 		private static string SrtDur(TimeSpan ts)
 		{
-			return SRV.FmtSrtTm.fmt(ts.Minutes.ToString("D2"), ts.Seconds.ToString("D2"));
+			return FMT.SrtTm.fmt(ts.Minutes.ToString("D2"), ts.Seconds.ToString("D2"));
 		}//func
 
 		private static TimeSpan Convert(DateTime dt)
@@ -85,12 +47,21 @@ namespace SrtImport
 			Name = Name.Substring(0, Name.Length - 4);
 		}//func
 
-		public string FileName 
+		public string FileXml 
 		{ 
 			get 
 			{
 				string s = Path.Combine(Environment.CurrentDirectory, Name);
-				return s + SRV.ExtXml;
+				return s + EXT.Xml;
+			}
+		}//prop
+
+		public string FileTrn
+		{
+			get
+			{
+				string s = Path.Combine(Environment.CurrentDirectory, Name);
+				return s + EXT.Trn;
 			}
 		}//prop
 
@@ -112,29 +83,29 @@ namespace SrtImport
 		public void Save()
 		{
 			dt.AcceptChanges();
-			ds.WriteXml(FileName, XmlWriteMode.WriteSchema);
+			ds.WriteXml(FileXml, XmlWriteMode.WriteSchema);
 		}//func
 
 		public void Load(string File)
 		{
 			SetName(File);
 			ds.Clear();
-			ds.ReadXml(FileName, XmlReadMode.ReadSchema);
+			ds.ReadXml(FileXml, XmlReadMode.ReadSchema);
 			dt.AcceptChanges();
 		}//func
 
 		public void Import(string path)
 		{
 			SetName(path);
-			if (path.EndsWith(Srt.SRV.ExtSrt))
+			if (path.EndsWith(EXT.Srt))
 				ImportSrt(path);
-			else if (path.EndsWith(Srt.SRV.ExtLyr))
+			else if (path.EndsWith(EXT.Lyr))
 				ImportLyr(path);
 		}
 
 		private void ImportLyr(string path)
 		{
-			using (TextReader tr = new StreamReader(path, SRV.enc))
+			using (TextReader tr = new StreamReader(path, SRV.encoding))
 			{
 				string s, Value, Min, Sec;
 				TimeSpan TmBeg, TmEnd;
@@ -175,7 +146,7 @@ namespace SrtImport
 
 		public void ImportSrt(string File)
 		{
-			using (TextReader tr = new StreamReader(File, SRV.enc))
+			using (TextReader tr = new StreamReader(File, SRV.encoding))
 			{
 				string s;
 				int Num;
@@ -227,13 +198,13 @@ namespace SrtImport
 			TmEnd = TimeSpan.Parse(sEnd);
 		}//func
 
-		public void Show(DataGridView grid)
+		public void Show(System.Windows.Forms.DataGridView grid)
 		{
 			grid.DataSource = dt;
 			grid.Columns[FLD.Id].Width = 50;
-			grid.Columns[FLD.Content].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+			grid.Columns[FLD.Content].AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
 
-			foreach (DataGridViewColumn item in grid.Columns)
+			foreach (System.Windows.Forms.DataGridViewColumn item in grid.Columns)
 			{
 				if (item.ValueType == typeof(TimeSpan))
 				{
@@ -337,7 +308,8 @@ namespace SrtImport
 
 		private void ExportSrt(string Folder)
 		{
-			string path = Folder.addToPath(Name) + SRV.ExtSrt;
+			string path = Folder.addToPath(Name) + EXT.Srt;
+			string sAll;
 			StringBuilder sb = new StringBuilder();
 			foreach (DataRow dr in dt.Rows)
 			{
@@ -348,20 +320,55 @@ namespace SrtImport
 					, dr.TmEnd().ToSrt()
 					);
 				sb.AppendLine(string.Empty);
-				sb.AppendLine(dr.Content());
+				sb.AppendLine(dr.Content() + SRV.Space);
 				sb.AppendLine(string.Empty);
 			}//for
+			sAll = sb.ToString();
 
-			File.WriteAllText(path, sb.ToString(), SRV.enc);
+			#region Trn
+			if (File.Exists(FileTrn))
+			{
+				string line;
+				string D = " - ";
+				string sRus, sEng;
+				int Didx = 0, Dlen = D.Length;
+				Dictionary<string, string> Trn = new Dictionary<string, string>();
+				using (StreamReader sr = new StreamReader(FileTrn, SRV.encoding))
+				{
+					while ((line = sr.ReadLine()) != null)
+					{
+						Didx = line.IndexOf(D);
+						sRus = line.Substring(Didx + Dlen).ToLower();
+						if (sRus.Length <= 12) //длинные переводы не влезут в строку субтитров
+						{
+							sEng = line.Substring(0, Didx).ToLower();
+							Trn.Add(sEng, sRus);	
+						}//if
+					}//while
+				}//using
+
+				string withTrn = "{0}({1}) ";
+				foreach (var key in Trn.Keys)
+				{
+					sEng = key + SRV.Space; //чтобы заменять не "word", а "word ". Иначе будут проблемы с "wordish"
+					sRus = withTrn.fmt(key, Trn[key]);
+					sAll = sAll.Replace(sEng, sRus);
+				}//for
+
+			}//if
+
+			#endregion
+
+			File.WriteAllText(path, sAll, SRV.encoding);
 		}//func
 
 		internal void ExportLyr(string Folder)
 		{
-			string path = Path.Combine(Folder, Name) + SRV.ExtLyr;
+			string path = Path.Combine(Folder, Name) + EXT.Lyr;
 			StringBuilder sb = new StringBuilder();
 			foreach (var s in LyrPar)
 			{
-				sb.AppendLine(SRV.FmtLyrPar.fmt(s, param.ContainsKey(s) ? param[s] : Name ));	
+				sb.AppendLine(FMT.LyrPar.fmt(s, param.ContainsKey(s) ? param[s] : Name ));	
 			}//for
 			sb.AppendLine("[la:en]");
 			sb.AppendLine("[by:BDB]");
@@ -370,7 +377,7 @@ namespace SrtImport
 				sb.AppendFormat("[{0}]{1}", dr.TmBeg().ToLyr(), LyrStr(dr.Content()));
 				sb.AppendLine(string.Empty);
 			}//for
-			File.WriteAllText(path, sb.ToString(), SRV.enc);
+			File.WriteAllText(path, sb.ToString(), SRV.encoding);
 		}//func
 
 		public void Export(string Folder)
@@ -400,7 +407,7 @@ namespace SrtImport
 
 		public static string ToSrt(this TimeSpan ts)
 		{
-			return Srt.SRV.FmtSrtTm.fmt(
+			return FMT.SrtTm.fmt(
 				ts.Hours.ToString("D2")
 				, ts.Minutes.ToString("D2")
 				, ts.Seconds.ToString("D2")
@@ -409,18 +416,18 @@ namespace SrtImport
 
 		public static string ToLyr(this TimeSpan ts)
 		{
-			return Srt.SRV.FmtLyrTm.fmt(
+			return FMT.LyrTm.fmt(
 				ts.Minutes.ToString("D2")
 				, ts.Seconds.ToString("D2")
 				, (ts.Milliseconds / 10).ToString("D2"));
 		}//func
 
-		public static TimeSpan TmBeg(this DataRow dr)	{	return dr.Field<TimeSpan>(Srt.FLD.TmBeg);	}
-		public static TimeSpan TmEnd(this DataRow dr) { return dr.Field<TimeSpan>(Srt.FLD.TmEnd); }
-		public static TimeSpan Tm(this DataRow dr) { return dr.Field<TimeSpan>(Srt.FLD.Tm); }
+		public static TimeSpan TmBeg(this DataRow dr)	{	return dr.Field<TimeSpan>(FLD.TmBeg);	}
+		public static TimeSpan TmEnd(this DataRow dr) { return dr.Field<TimeSpan>(FLD.TmEnd); }
+		public static TimeSpan Tm(this DataRow dr) { return dr.Field<TimeSpan>(FLD.Tm); }
 		public static TimeSpan TmDur(this DataRow dr) { return dr.TmEnd() - dr.TmBeg(); }
-		public static int ID(this DataRow dr) { return dr.Field<int>(Srt.FLD.Id); }
-		public static string Content(this DataRow dr) { return dr.Field<string>(Srt.FLD.Content); }
+		public static int ID(this DataRow dr) { return dr.Field<int>(FLD.Id); }
+		public static string Content(this DataRow dr) { return dr.Field<string>(FLD.Content); }
 
 	}//class
 }//ns
