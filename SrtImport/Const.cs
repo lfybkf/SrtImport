@@ -62,6 +62,7 @@ namespace SrtImport
 	{
 		public static string Srt = @"C:\Temp";
 		public static string Lyr = @"C:\Temp";
+		public static string Cur = Environment.CurrentDirectory;
 	}//class
 
 }//ns

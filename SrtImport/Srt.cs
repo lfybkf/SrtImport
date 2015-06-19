@@ -25,45 +25,24 @@ namespace SrtImport
 
 		DataTable dt = new DataTable("Srt");
 		DataSet ds = new DataSet("Movie");
-		string Name;
+		public string Name { get; private set; }
+		public string FileXml { get { return Path.Combine(DIR.Cur, Name).add(EXT.Xml); } }
+		public string FileTrn { get { return Path.Combine(DIR.Cur, Name).add(EXT.Trn); } }
+
 		Dictionary<string, string> param = new Dictionary<string, string>();
-		static readonly string[] LyrPar = { "ti", "ar", "al"};
+
 
 		private static string SrtDur(TimeSpan ts)
 		{
 			return FMT.SrtTm.fmt(ts.Minutes.ToString("D2"), ts.Seconds.ToString("D2"));
 		}//func
 
-		private static TimeSpan Convert(DateTime dt)
-		{
-			TimeSpan Ret = dt - new DateTime(2000, 1, 1);
-			return Ret;
-		}//func
-
-		
 		public void SetName(string FileName)
 		{
 			Name = Path.GetFileName(FileName);
 			Name = Name.Substring(0, Name.Length - 4);
 		}//func
 
-		public string FileXml 
-		{ 
-			get 
-			{
-				string s = Path.Combine(Environment.CurrentDirectory, Name);
-				return s + EXT.Xml;
-			}
-		}//prop
-
-		public string FileTrn
-		{
-			get
-			{
-				string s = Path.Combine(Environment.CurrentDirectory, Name);
-				return s + EXT.Trn;
-			}
-		}//prop
 
 		public Srt()
 		{
@@ -159,10 +138,10 @@ namespace SrtImport
 					if (string.IsNullOrWhiteSpace(s))
 						continue;
 
-					if (int.TryParse(s, out Num))
+					if (int.TryParse(s, out Num)) //число - признак новой секции
 					{
-						if (dr != null)
-							dt.Rows.Add(dr); //ранее созданный
+						//ранее созданный с непустым содержанием
+						if (dr != null && dr[FLD.Content] != DBNull.Value) { dt.Rows.Add(dr); }
 
 						dr = dt.NewRow();
 						dr[FLD.Content] = DBNull.Value;
@@ -173,18 +152,21 @@ namespace SrtImport
 
 					if (sect == Section.Content)
 					{
-						dr[FLD.Content] = (dr[FLD.Content] != DBNull.Value) ?
-							(string)dr[FLD.Content] + Environment.NewLine + s : s;
+						dr[FLD.Content] = (dr[FLD.Content] == DBNull.Value) ?	s	: dr.Content().addLine(s);
 					}//if
 
 					if (sect == Section.Period)
 					{
-						sect = Section.Content;
 						ParsePeriod(s, out TmBeg, out TmEnd);
 						dr[FLD.TmBeg] = TmBeg;
 						dr[FLD.TmEnd] = TmEnd;
+						sect = Section.Content;
 					}//if
 				}//while
+				
+				//последний неотловленный
+				if (dr != null && dr[FLD.Content] != DBNull.Value) { dt.Rows.Add(dr); }
+
 			}//using
 		}//func
 
@@ -208,7 +190,12 @@ namespace SrtImport
 			{
 				if (item.ValueType == typeof(TimeSpan))
 				{
-					item.Width = 120;
+					item.Width = 140;
+				}//if
+
+				if (item.Name == FLD.TmEnd)
+				{
+					item.Width = 0;
 				}//if
 			}//for
 		}//func
@@ -374,6 +361,7 @@ namespace SrtImport
 		{
 			string path = Path.Combine(Folder, Name) + EXT.Lyr;
 			StringBuilder sb = new StringBuilder();
+			string[] LyrPar = { "ti", "ar", "al"};
 			foreach (var s in LyrPar)
 			{
 				sb.AppendLine(FMT.LyrPar.fmt(s, param.ContainsKey(s) ? param[s] : Name ));	
