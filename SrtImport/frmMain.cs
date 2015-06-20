@@ -32,16 +32,17 @@ namespace SrtImport
 				if (File.Exists(path))
 				{
 					if (path.EndsWith(EXT.Xml) == false)
-				{
+					{
 						srt.Import(path);
 						srt.Save();
 						path = Path.ChangeExtension(path, EXT.Xml);
-				}//if
+					}//if
 
 					doOpen(path);
 				}//if
 
-				if (Directory.Exists(path))
+				//если параметр каталог, то это массовая конвертация
+				if (Directory.Exists(path) && args.Any(s => s == "cmdSrt2Lrc"))
 				{
 					Srt hSrt;
 					IEnumerable<string> list = Directory.EnumerateFiles(path).Where(s => s.EndsWith(EXT.Srt));
@@ -50,6 +51,23 @@ namespace SrtImport
 						hSrt = new Srt();
 						hSrt.Import(s);
 						hSrt.ExportLyr(path);
+					}//for
+
+					Close();
+				}//if
+
+				if (Directory.Exists(path) && args.Any(s => s == "cmdSrtWithTrn"))
+				{
+					Srt hSrt;
+					string FileTrnDirect = args.FirstOrDefault(s => s.EndsWith("trn"));
+					IEnumerable<string> list = Directory.EnumerateFiles(path).Where(s => s.EndsWith(EXT.Srt));
+					foreach (string s in list)
+					{
+						hSrt = new Srt();
+						hSrt.FileTrnDirect = FileTrnDirect;
+						hSrt.Import(s);
+						hSrt.Save();
+						hSrt.ExportSrt(DIR.Srt);
 					}//for
 
 					Close();

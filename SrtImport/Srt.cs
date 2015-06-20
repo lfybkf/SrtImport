@@ -27,7 +27,11 @@ namespace SrtImport
 		DataSet ds = new DataSet("Movie");
 		public string Name { get; private set; }
 		public string FileXml { get { return Path.Combine(DIR.Cur, Name).add(EXT.Xml); } }
-		public string FileTrn { get { return Path.Combine(DIR.Cur, Name).add(EXT.Trn); } }
+
+		public string FileTrnDirect { get; set; }
+		public string FileTrn { get { return (FileTrnDirect != null) ? 
+			Path.Combine(DIR.Cur, FileTrnDirect)
+			: Path.Combine(DIR.Cur, Name).add(EXT.Trn); } }
 
 		Dictionary<string, string> param = new Dictionary<string, string>();
 
@@ -294,7 +298,7 @@ namespace SrtImport
 			#endregion
 		}//func
 
-		private void ExportSrt(string Folder)
+		internal void ExportSrt(string Folder)
 		{
 			string path = Folder.addToPath(Name) + EXT.Srt;
 			string sAll;
