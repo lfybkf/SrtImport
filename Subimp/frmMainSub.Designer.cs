@@ -32,11 +32,13 @@
 			this.listMain = new System.Windows.Forms.ListBox();
 			this.btnDo = new System.Windows.Forms.Button();
 			this.btnSave = new System.Windows.Forms.Button();
+			this.ctlFind = new System.Windows.Forms.TextBox();
 			this.panManage.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// panManage
 			// 
+			this.panManage.Controls.Add(this.ctlFind);
 			this.panManage.Controls.Add(this.btnSave);
 			this.panManage.Controls.Add(this.btnDo);
 			this.panManage.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -77,6 +79,14 @@
 			this.btnSave.Text = "Save";
 			this.btnSave.UseVisualStyleBackColor = true;
 			// 
+			// ctlFind
+			// 
+			this.ctlFind.Dock = System.Windows.Forms.DockStyle.Left;
+			this.ctlFind.Location = new System.Drawing.Point(174, 0);
+			this.ctlFind.Name = "ctlFind";
+			this.ctlFind.Size = new System.Drawing.Size(100, 30);
+			this.ctlFind.TabIndex = 2;
+			// 
 			// frmMainSub
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
@@ -100,6 +110,7 @@
 		private System.Windows.Forms.ListBox listMain;
 		private System.Windows.Forms.Button btnDo;
 		private System.Windows.Forms.Button btnSave;
+		private System.Windows.Forms.TextBox ctlFind;
 	}
 }
 

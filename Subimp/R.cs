@@ -9,11 +9,11 @@ namespace Subimp
 	public static class TS
 	{
 		public static readonly TimeSpan Dur = new TimeSpan(0, 0, 0, 5);
-		public static readonly TimeSpan Delta = new TimeSpan(0, 0, 0, 0, 1);
+		public static readonly TimeSpan Delta = new TimeSpan(0, 0, 0, 0, 200);
 		public static readonly TimeSpan Zero = TimeSpan.Zero;
 	}//class
 
-	public static class FMT
+	public static class zFMT
 	{
 		//public static readonly string Ts = "hh:mm:ss";
 		//public static readonly string Te = "          ";

@@ -26,7 +26,7 @@ namespace Subimp
 		{
 			if (ts == TimeSpan.Zero)
 			{
-				return "__:__:__._";
+				return "==========";
 			}//if
 
 			string result = "{0:D2}:{1:D2}:{2:D2},{3:D1}".fmt(

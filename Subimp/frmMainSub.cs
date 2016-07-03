@@ -14,6 +14,10 @@ namespace Subimp
 	public partial class frmMainSub : Form
 	{
 		Pack pack;
+		public Sub SelectedSub { 
+			get {return listMain.SelectedItem as Sub; }
+			set { if (value != null && listMain.Items.Contains(value)) { listMain.SelectedItem = value; } }
+		}
 
 		public frmMainSub()
 		{
@@ -23,7 +27,50 @@ namespace Subimp
 			
 			btnDo.Click += btnDo_Click;
 			btnSave.Click += btnSave_Click;
+			listMain.KeyUp += listMain_KeyUp;
+			ctlFind.KeyUp += ctlFind_KeyUp;
+
+			listMain.Select();
 		}
+
+		void ctlFind_KeyUp(object sender, KeyEventArgs e)
+		{
+			if (e.KeyCode == Keys.F3 || e.KeyCode == Keys.Enter)
+			{
+				Sub sub = pack.Find(ctlFind.Text, SelectedSub);
+				SelectedSub = sub;
+			}//if;
+			else if (e.KeyCode == Keys.Escape)
+			{
+				listMain.Select();
+			}//if
+		}
+
+		void listMain_KeyUp(object sender, KeyEventArgs e)
+		{
+			Sub sub = SelectedSub;
+			if (e.KeyCode == Keys.Delete && sub != null)
+			{
+				pack.Remove(sub);
+				ListRefresh();
+			}//if
+			else if (e.KeyCode == Keys.F2 && sub != null)
+			{
+				frmEdit frm = new frmEdit();
+				frm.Tm = sub.getTmBeg();
+				frm.Content = sub.Content;
+				if (frm.ShowDialog() == DialogResult.OK)
+				{
+					sub.Ficks = frm.Tm.Ticks;
+					sub.Content = frm.Content;
+					ListRefresh();
+				}//if
+			}//if
+			else if (e.KeyCode == Keys.F3)
+			{
+				ctlFind.Select();
+			}//if
+		}//function
 
 		void frmMainSub_Load(object sender, EventArgs e)
 		{
@@ -42,7 +89,9 @@ namespace Subimp
 					pack = Pack.Load(input);
 				}//if
 			}//if
-		}
+
+			ListRefresh();
+		}//function
 
 		public  void Info(string s)
 		{
@@ -61,6 +110,19 @@ namespace Subimp
 			pack.ExportSrt();
 			pack.ExportLyr();
 			Info("export");
+			ListRefresh();
 		}
+
+		public  void ListRefresh()
+		{
+			if (pack == null)			{				return;			}//if
+			var selected = listMain.with(z => z.SelectedItem);
+			listMain.DataSource = null;
+			listMain.DataSource = pack.Items;
+			if (selected != null)
+			{
+				listMain.SelectedItem = selected;
+			}//if
+		}//function
 	}//function
 }

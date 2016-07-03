@@ -84,38 +84,37 @@ namespace Subimp
 
 		internal void ExportSrt()
 		{
-			IEnumerable<string> output = Items.Select(z => 
-				{
-					return z.ID.ToString()
-						.addLine(
-						"{0} --> {1}".fmt(z.getTmBeg().ToStrSRT(), z.getTmEnd().ToStrSRT())
-						, z.Content
-						, string.Empty);
-				});
-
+			IEnumerable<string> output = Items.Select(z => z.toSrt());
 			var path = io.Path.Combine(DIR.Srt, Name) + EXT.Srt;
 			io.File.WriteAllLines(path, output);
 		}
 
 		internal void ExportLyr()
 		{
-			IEnumerable<string> output = Items.Select(z =>
-			{
-				return "[{0}] {1}".fmt(z.getTmBeg().ToStrLYR(), z.Content);
-			});
-
+			IEnumerable<string> output = Items.Select(z => z.toLyr());
 			var path = io.Path.Combine(DIR.Lyr, Name) + EXT.Lyr;
 			io.File.WriteAllLines(path, output);
 		}
 
 		internal void Retime()
 		{
-			;
+			for (int i = 0; i < list.Count; i++)
+			{
+				list[i].Retime();
+			}//for
+
+
 		}
 
-		public  Sub Find(string s)
+		public  Sub Find(string s, Sub previous = null)
 		{
-			return list.FirstOrDefault(z => z.Content.Contains(s));
+			IEnumerable<Sub> listToFind = (previous == null) ? list : list.SkipWhile(z => !z.Equals(previous)).Skip(1);
+			return listToFind.FirstOrDefault(z => z.Content.Contains(s));
 		}//function
+
+		internal void Remove(Sub sub)
+		{
+			list.Remove(sub);
+		}
 	}//class
 }//namespace
