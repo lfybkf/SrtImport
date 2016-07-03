@@ -8,7 +8,7 @@ namespace SrtImport
 {
 	public class FLD
 	{
-		public static readonly string Id = "Id";
+		public static readonly string ID = "Id";
 		public static readonly string TmBeg = "TmBeg";
 		public static readonly string TmEnd = "TmEnd";
 		public static readonly string Content = "Content";
@@ -18,7 +18,7 @@ namespace SrtImport
 	public static class SRV
 	{
 		public static Encoding encoding = Encoding.GetEncoding(1251);
-		public static TimeSpan TmDurMin = new TimeSpan(0,0,5);
+		//public static TimeSpan TmDurMin = new TimeSpan(0,0,5);
 		public static readonly string Delim = "-->";
 		public static readonly string Zpt = ",";
 		public static readonly string Point = ".";

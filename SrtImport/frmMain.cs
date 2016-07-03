@@ -192,7 +192,7 @@ namespace SrtImport
 		}//function
 		void doDelete()
 		{
-			int Id = (int)gridMain.getCurrent(FLD.Id);
+			int Id = (int)gridMain.getCurrent(FLD.ID);
 			srt.Delete(Id);
 		}//function
 		void doFind()

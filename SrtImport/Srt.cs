@@ -12,6 +12,9 @@ namespace SrtImport
 
 	public class Srt
 	{
+		public static TimeSpan TmDurDefault = new TimeSpan(0, 0, 0, 5);
+		public static TimeSpan TmDelta = new TimeSpan(0, 0, 0, 0, 2);
+		
 		enum Section {Period, Content, End }
 
 		public class Ival
@@ -50,15 +53,15 @@ namespace SrtImport
 
 		public Srt()
 		{
-			dt.Columns.Add(FLD.Id, typeof(int));
+			dt.Columns.Add(FLD.ID, typeof(int));
 			dt.Columns.Add(FLD.TmBeg, typeof(TimeSpan));
 			dt.Columns.Add(FLD.TmEnd, typeof(TimeSpan));
 			dt.Columns.Add(FLD.Tm, typeof(TimeSpan));
 			dt.Columns.Add(FLD.Content, typeof(string));
-			dt.Columns[FLD.Id].AutoIncrement = true;
-			dt.Columns[FLD.Id].AutoIncrementSeed = 1;
+			dt.Columns[FLD.ID].AutoIncrement = true;
+			dt.Columns[FLD.ID].AutoIncrementSeed = 1;
 			dt.Columns[FLD.Tm].AllowDBNull = true;
-			dt.SetPK(FLD.Id);
+			dt.SetPK(FLD.ID);
 			
 			ds.Tables.Add(dt);
 		}//func
@@ -92,7 +95,6 @@ namespace SrtImport
 			{
 				string s, Value, Min, Sec;
 				TimeSpan TmBeg, TmEnd;
-				TimeSpan TmDuration = new TimeSpan(0, 0, 5);
 				DataRow dr = null;
 				Regex rexPar = new Regex(@"\[(?<Key>\D+):(?<Value>\D+)\].*");
 				Regex rexOne = new Regex(@"\[(?<Min>[0-9]{2}):(?<Sec>[0-9]{2})\.[0-9]{2}\](?<Value>.+)");
@@ -114,7 +116,7 @@ namespace SrtImport
 						Min = m.Groups["Min"].Value;
 						Sec = m.Groups["Sec"].Value;
 						TmBeg = new TimeSpan(0, Min.ToInt(), Sec.ToInt());
-						TmEnd = TmBeg.Add(TmDuration);
+						TmEnd = TmBeg.Add(TmDurDefault);
 						
 						dr = dt.NewRow();
 						dr[FLD.Content] = Value;
@@ -187,7 +189,7 @@ namespace SrtImport
 		public void Show(System.Windows.Forms.DataGridView grid)
 		{
 			grid.DataSource = dt;
-			grid.Columns[FLD.Id].Width = 50;
+			grid.Columns[FLD.ID].Width = 50;
 			grid.Columns[FLD.Content].AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
 
 			foreach (System.Windows.Forms.DataGridViewColumn item in grid.Columns)
@@ -242,7 +244,7 @@ namespace SrtImport
 			TimeSpan TmBegNeed = dt.Rows.Find(ival.BegID).Tm();
 			TimeSpan TmEndReal = dt.Rows.Find(ival.EndID).TmBeg();
 			TimeSpan TmBegReal = dt.Rows.Find(ival.BegID).TmBeg();
-			TimeSpan TmDiffNeed, TmDiffReal, TmBeg, TmDur;
+			TimeSpan TmDiffNeed, TmDiffReal, TmBeg;
 			long Need = (TmEndNeed - TmBegNeed).Ticks;
 			long Real = (TmEndReal - TmBegReal).Ticks;
 
@@ -256,13 +258,10 @@ namespace SrtImport
 					break;
 
 				TmBeg = dr.TmBeg();
-				TmDur = dr.TmDur();
 
 				TmDiffReal = TmBeg - TmBegReal;
 				TmDiffNeed = new TimeSpan((long)(TmDiffReal.Ticks * K));
-				dr[FLD.TmBeg] = (TmBegNeed + TmDiffNeed).RoundToSec();
-				UpdateDuration(dr, TmDur);
-
+				dr[FLD.TmBeg] = (TmBegNeed + TmDiffNeed).Round();
 			}//for
 		}//func
 
@@ -274,26 +273,14 @@ namespace SrtImport
 			{
 				Retime(ival);
 			}//while
+
 			#region Align to Tm
-			TimeSpan Tm, TmDur;
+			TimeSpan Tm;
 			var rows = dt.AsEnumerable().Where(r => r[FLD.Tm] != DBNull.Value);
 			foreach (DataRow dr in rows)
 			{
 				Tm = dr.Tm();
-				TmDur = dr.TmDur();
-				TmDur = (TmDur < SRV.TmDurMin) ? SRV.TmDurMin : TmDur;
 				dr[FLD.TmBeg] = Tm;
-				dr[FLD.TmEnd] = (Tm + TmDur).RoundToSec();
-			}//for
-			#endregion
-
-			#region AlignTmEnd
-			DataRow drCurrent, drNext;
-			for (int i = 0; i < dt.Rows.Count - 1; i++)
-			{
-				drCurrent = dt.Rows[i];
-				drNext = dt.Rows[i + 1];
-				if (drCurrent.TmEnd() > drNext.TmBeg()) { drCurrent[FLD.TmEnd] = drNext.TmBeg(); }//if
 			}//for
 			#endregion
 		}//func
@@ -305,11 +292,11 @@ namespace SrtImport
 			StringBuilder sb = new StringBuilder();
 			foreach (DataRow dr in dt.Rows)
 			{
-				sb.AppendLine(dr[FLD.Id].ToString());
+				sb.AppendLine(dr[FLD.ID].ToString());
 				sb.AppendFormat("{0} {1} {2}",
 					(dr.TmBeg().ToSrt())
 					, SRV.Delim
-					, dr.TmEnd().ToSrt()
+					, (dr.TmBeg() + dr.TmDur()).ToSrt()
 					);
 				sb.AppendLine(string.Empty);
 				sb.AppendLine(dr.Content() + SRV.Space);
@@ -386,10 +373,9 @@ namespace SrtImport
 			ExportLyr(Folder);	
 		}//func
 
-		static string LyrStr(string s)	{	return s.Replace(Environment.NewLine, SRV.Space);	}//func
+		static string LyrStr(string s)	{	return s.Replace(Environment.NewLine, SRV.Space);	}
 		public bool IsChanged	{	get	{	return dt.AsEnumerable().Any(dr => dr.RowState == DataRowState.Modified);	}	}
-		static void UpdateDuration(DataRow dr, TimeSpan TmDur) { dr[FLD.TmEnd] = dr.TmBeg() + TmDur; }//func
-		public void Delete(int aId) { dt.Rows.Find(aId).execute(dr => dt.Rows.Remove(dr)); }//func
+		public void Delete(int aId) { var dr = dt.Rows.Find(aId); if (dr!= null) {dt.Rows.Remove(dr);} }
 
 	}//class
 
@@ -398,11 +384,11 @@ namespace SrtImport
 		public static int ToInt(this string s)
 		{
 			int result;
-			if (int.TryParse(s, out result) == false)			{				return default(int);			}//if
+			if (int.TryParse(s, out result) == false)	{return default(int);}//if
 			return result;
 		}//function
 
-		public static TimeSpan RoundToSec(this TimeSpan ts)		{	return new TimeSpan(ts.Hours, ts.Minutes, ts.Seconds);	}//func
+		public static TimeSpan Round(this TimeSpan ts)		{	return new TimeSpan(ts.Days, ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds);	}//func
 		private static DateTime ToDateTime(this TimeSpan ts)		{	return new DateTime(2000, 1, 1).Add(ts);	}//func
 
 		public static string ToSrt(this TimeSpan ts)
@@ -423,11 +409,42 @@ namespace SrtImport
 		}//func
 
 		public static TimeSpan TmBeg(this DataRow dr)	{	return dr.Field<TimeSpan>(FLD.TmBeg);	}
-		public static TimeSpan TmEnd(this DataRow dr) { return dr.Field<TimeSpan>(FLD.TmEnd); }
 		public static TimeSpan Tm(this DataRow dr) { return dr.Field<TimeSpan>(FLD.Tm); }
-		public static TimeSpan TmDur(this DataRow dr) { return dr.TmEnd() - dr.TmBeg(); }
-		public static int ID(this DataRow dr) { return dr.Field<int>(FLD.Id); }
+		public static int ID(this DataRow dr) { return dr.Field<int>(FLD.ID); }
 		public static string Content(this DataRow dr) { return dr.Field<string>(FLD.Content); }
 
+		public static DataRow Next(this DataRow dr) { 
+			var table = dr.Table;
+			var index = table.Rows.IndexOf(dr);
+			if (index < table.Rows.Count-1)
+			{
+				return table.Rows[index + 1];
+			}//if
+			else
+			{
+				return null;
+			}//else
+		}
+		
+		public static TimeSpan TmDur(this DataRow dr) {
+			var drNext = dr.Next();
+			if (drNext == null)
+			{
+				return Srt.TmDurDefault;
+			}//if
+			else
+			{
+				var result = drNext.TmBeg() - dr.TmBeg();
+				if (result > TimeSpan.Zero && result < Srt.TmDurDefault)
+				{
+					return result;
+				}//if
+				else
+				{
+					return Srt.TmDurDefault;
+				}//else
+			}//else
+		}
+		
 	}//class
 }//ns
