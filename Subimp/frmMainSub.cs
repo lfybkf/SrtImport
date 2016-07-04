@@ -84,6 +84,12 @@ namespace Subimp
 					pack = new Pack(io.Path.GetFileNameWithoutExtension(input));
 					pack.ImportSrt(ss);
 				}//if
+				else if (input.EndsWith(EXT.Lyr))
+				{
+					var ss = io.File.ReadAllLines(input);
+					pack = new Pack(io.Path.GetFileNameWithoutExtension(input));
+					pack.ImportLyr(ss);
+				}//if
 				else if (input.EndsWith(EXT.Json))
 				{
 					pack = Pack.Load(input);

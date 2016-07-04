@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using io = System.IO;
 using BDB;
+using System.Text.RegularExpressions;
 
 namespace Subimp
 {
@@ -91,6 +92,32 @@ namespace Subimp
 					{
 						item.Content = item.Content.Any() ? item.Content.addLine(s) : s;
 					}//else
+				}//if
+			}//for
+
+			this.NumerateAndPack();
+		}//function
+
+		public void ImportLyr(IEnumerable<string> ss)
+		{
+			Sub sub = null;
+			Regex rexOne = new Regex(@"\[(?<Min>[0-9]{2}):(?<Sec>[0-9]{2})\.[0-9]{2}\](?<Content>.+)");
+			Match m = null;
+			string Min, Sec;
+			foreach (var s in ss)
+			{
+				if (string.IsNullOrWhiteSpace(s))
+					continue;
+
+				if (rexOne.IsMatch(s))
+				{
+					m = rexOne.Match(s);
+					sub = new Sub();
+					sub.Content = m.Groups["Content"].Value;
+					Min = m.Groups["Min"].Value;
+					Sec = m.Groups["Sec"].Value;
+					sub.TmBeg = new TimeSpan(0, Min.ToInt(), Sec.ToInt());
+					list.Add(sub);
 				}//if
 			}//for
 
