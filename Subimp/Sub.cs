@@ -10,18 +10,18 @@ namespace Subimp
 	public class Sub
 	{
 		public int ID { get; set; }
-		public long Ticks { get { return Tm.Ticks; } set { Tm = new TimeSpan(value); } }
-		public long Ficks { get { return Fm.Ticks; } set { Fm = new TimeSpan(value); } }
+		public long Ticks { get { return TmBeg.Ticks; } set { TmBeg = new TimeSpan(value); } }
+		public long Ficks { get { return TmFix.Ticks; } set { TmFix = new TimeSpan(value); } }
 		public string Content { get; set; }
-		TimeSpan Tm;
-		TimeSpan Fm;
+		internal TimeSpan TmBeg;
+		internal TimeSpan TmFix;
 		
 		Pack pack = null;
 
 		public Sub()
 		{
 			ID = 0;
-			Fm = TS.Zero;
+			TmFix = TS.Zero;
 			Content = string.Empty;
 		}//constructor
 
@@ -29,22 +29,41 @@ namespace Subimp
 		{
 			return "{0:D3} - {1} - {2} - {3}".fmt(
 				ID
-				, Tm.ToStr()
-				, Fm.ToStr()
+				, TmBeg.ToStr()
+				, TmFix.ToStr()
 				, Content);
 		}
 
 		internal Sub Next { get { return pack.Items.SkipWhile(z => z.ID <= this.ID).FirstOrDefault(); } }
-		internal TimeSpan TmEnd { get { return Next.with(z => z.Tm - TS.Delta, Tm.Add(TS.Dur)); } }
-		internal TimeSpan TmBeg { get { return Tm; } }
-		internal TimeSpan TmFix { get { return Fm; } }
-		internal TimeSpan TmDur { get { return TmEnd - Tm; } }
+		//internal TimeSpan TmBeg { get { return Tm; } }
+		//internal TimeSpan TmFix { get { return Fm; } }
+		internal TimeSpan TmDur { get { return TmEnd - TmBeg; } }
+		internal TimeSpan TmEnd { 
+			get {
+				Sub next = Next;
+				if (next == null)
+				{
+					return TmBeg.Add(TS.Dur);
+				}//if
+				else
+				{
+					TimeSpan result = next.TmBeg - TS.Delta;
+					if (result - TmBeg > TS.Dur)
+					{
+						return TmBeg + TS.Dur;
+					}//if
+					else
+					{
+						return result;
+					}//else
+				}//else
+			} }
 
 		public  string toSrt()
 		{
 			return ID.ToString()
 						.addLine(
-						"{0} --> {1}".fmt(Tm.ToStrSRT(), TmEnd.ToStrSRT())
+						"{0} --> {1}".fmt(TmBeg.ToStrSRT(), TmEnd.ToStrSRT())
 						, Content
 						, string.Empty);
 		}//function
@@ -63,7 +82,7 @@ namespace Subimp
 		{
 			get
 			{
-				return Fm != TS.Zero;
+				return TmFix != TS.Zero;
 			}
 		}
 	}//class
