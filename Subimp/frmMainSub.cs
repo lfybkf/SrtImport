@@ -57,7 +57,7 @@ namespace Subimp
 			else if (e.KeyCode == Keys.F2 && sub != null)
 			{
 				frmEdit frm = new frmEdit();
-				frm.Tm = sub.getTmBeg();
+				frm.Tm = sub.TmBeg;
 				frm.Content = sub.Content;
 				if (frm.ShowDialog() == DialogResult.OK)
 				{

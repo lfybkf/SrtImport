@@ -34,23 +34,24 @@ namespace Subimp
 				, Content);
 		}
 
-		public Sub getNext() { return pack.Items.SkipWhile(z => z.ID <= this.ID).FirstOrDefault(); } 
-		public TimeSpan getTmEnd() {return getNext().with(z => z.Tm-TS.Delta, Tm.Add(TS.Dur));}
-		public TimeSpan getTmBeg() { return Tm; }
-		public TimeSpan getTmDur() { return getTmEnd() - Tm; }
+		internal Sub Next { get { return pack.Items.SkipWhile(z => z.ID <= this.ID).FirstOrDefault(); } }
+		internal TimeSpan TmEnd { get { return Next.with(z => z.Tm - TS.Delta, Tm.Add(TS.Dur)); } }
+		internal TimeSpan TmBeg { get { return Tm; } }
+		internal TimeSpan TmFix { get { return Fm; } }
+		internal TimeSpan TmDur { get { return TmEnd - Tm; } }
 
 		public  string toSrt()
 		{
 			return ID.ToString()
 						.addLine(
-						"{0} --> {1}".fmt(Tm.ToStrSRT(), getTmEnd().ToStrSRT())
+						"{0} --> {1}".fmt(Tm.ToStrSRT(), TmEnd.ToStrSRT())
 						, Content
 						, string.Empty);
 		}//function
 
 		public  string toLyr()
 		{
-			return "[{0}]{1}".fmt(getTmBeg().ToStrLYR(), Content);
+			return "[{0}]{1}".fmt(TmBeg.ToStrLYR(), Content);
 		}//function
 
 		public void setPack(Pack pack)
@@ -58,11 +59,11 @@ namespace Subimp
 			this.pack = pack;
 		}//function
 
-		public bool IsIvalable
+		internal bool IsIvalable
 		{
 			get
 			{
-				return Tm != TS.Zero;
+				return Fm != TS.Zero;
 			}
 		}
 	}//class

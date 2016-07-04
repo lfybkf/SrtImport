@@ -14,6 +14,11 @@ namespace Subimp
 		{
 			public Sub beg;
 			public Sub end;
+
+			public override string ToString()
+			{
+				return "{0} ({1}) -> {2} ({3})".fmt(beg.TmBeg.ToStrSRT(), beg.TmFix.ToStrSRT(), end.TmBeg.ToStrSRT(), end.TmFix.ToStrSRT());
+			}
 		}//class
 
 		public string Name {get;set;}
@@ -29,7 +34,7 @@ namespace Subimp
 			this.Name = Name;
 		}//constructor
 		
-		public void AfterWork()
+		public void NumerateAndPack()
 		{
 			Sub sub;
 			for (int i = 0; i < list.Count(); i++)
@@ -40,12 +45,22 @@ namespace Subimp
 			}//for
 		}//function
 
+		public void Numerate()
+		{
+			Sub sub;
+			for (int i = 0; i < list.Count(); i++)
+			{
+				sub = list.ElementAt(i);
+				sub.ID = i + 1;
+			}//for
+		}//function
+
 		public static Pack Load(string path)
 		{
 			Pack pack;
 			string json = io.File.ReadAllText(path);
 			pack = json.Deserialize<Pack>();
-			pack.AfterWork();
+			pack.NumerateAndPack();
 			return pack;
 		}//function
 
@@ -79,7 +94,7 @@ namespace Subimp
 				}//if
 			}//for
 
-			this.AfterWork();
+			this.NumerateAndPack();
 		}//function
 
 		public  void Save()
@@ -104,7 +119,9 @@ namespace Subimp
 
 		internal void Retime()
 		{
-			//create ivals
+			Numerate();
+
+			#region create ivals
 			List<Ival> ivals = new List<Ival>();
 			Ival ival = null;
 			Sub sub = null;
@@ -122,6 +139,12 @@ namespace Subimp
 					ival = null;
 				}//if
 			}//for
+			#endregion
+
+			foreach (var item in ivals)
+			{
+				Retime(item);
+			}
 		}//function
 
 		void Retime(Ival ival)
@@ -131,9 +154,22 @@ namespace Subimp
 			long tiEndFix = ival.end.Ficks;
 			long tiEnd = ival.end.Ticks;
 
-			float K = (tiEndFix - tiBegFix) / (tiEnd - tiBeg);
+			double K = (double)(tiEndFix - tiBegFix) / (double)(tiEnd - tiBeg);
 
+			Sub sub=null;
+			long lenFromBeg;
+			double lenFromBegFix;
+			for (int i = 0; i < list.Count; i++)
+			{
+				sub = list[i];
+				if (sub.ID < ival.beg.ID) { continue; }
+				if (sub.ID > ival.end.ID) { break; }
+				if (sub.ID == ival.end.ID || sub.ID == ival.beg.ID) { sub.Ticks = sub.Ficks; continue; }
 
+				lenFromBeg = sub.Ticks - tiBeg;
+				lenFromBegFix = lenFromBeg * K;
+				sub.Ticks = tiBegFix + (long)lenFromBegFix;
+			}//for
 		}//function
 
 
@@ -146,6 +182,7 @@ namespace Subimp
 		internal void Remove(Sub sub)
 		{
 			list.Remove(sub);
+			Numerate();
 		}
 	}//class
 }//namespace
