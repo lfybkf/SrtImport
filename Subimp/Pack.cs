@@ -10,6 +10,12 @@ namespace Subimp
 {
 	public class Pack
 	{
+		class Ival
+		{
+			public Sub beg;
+			public Sub end;
+		}//class
+
 		public string Name {get;set;}
 		List<Sub> list = new List<Sub>();
 		public IEnumerable<Sub> Items { get { return list; } set { list.AddRange(value); } }
@@ -98,13 +104,38 @@ namespace Subimp
 
 		internal void Retime()
 		{
+			//create ivals
+			List<Ival> ivals = new List<Ival>();
+			Ival ival = null;
+			Sub sub = null;
 			for (int i = 0; i < list.Count; i++)
 			{
-				list[i].Retime();
+				sub = list[i];
+				if (sub.IsIvalable && ival == null)
+				{
+					ival = new Ival { beg = sub };
+				}//if
+				else if (sub.IsIvalable && ival != null)
+				{
+					ival.end = sub;
+					ivals.Add(ival);
+					ival = null;
+				}//if
 			}//for
+		}//function
+
+		void Retime(Ival ival)
+		{
+			long tiBegFix = ival.beg.Ficks;
+			long tiBeg = ival.beg.Ticks;
+			long tiEndFix = ival.end.Ficks;
+			long tiEnd = ival.end.Ticks;
+
+			float K = (tiEndFix - tiBegFix) / (tiEnd - tiBeg);
 
 
-		}
+		}//function
+
 
 		public  Sub Find(string s, Sub previous = null)
 		{

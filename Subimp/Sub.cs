@@ -58,12 +58,12 @@ namespace Subimp
 			this.pack = pack;
 		}//function
 
-		internal void Retime()
+		public bool IsIvalable
 		{
-			if (Fm != TS.Zero)
+			get
 			{
-				Tm = Fm;
-			}//if
-		}//function
+				return Tm != TS.Zero;
+			}
+		}
 	}//class
 }//namespace
