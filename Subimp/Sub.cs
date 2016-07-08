@@ -35,8 +35,6 @@ namespace Subimp
 		}
 
 		internal Sub Next { get { return pack.Items.SkipWhile(z => z.ID <= this.ID).FirstOrDefault(); } }
-		//internal TimeSpan TmBeg { get { return Tm; } }
-		//internal TimeSpan TmFix { get { return Fm; } }
 		internal TimeSpan TmDur { get { return TmEnd - TmBeg; } }
 		internal TimeSpan TmEnd { 
 			get {
