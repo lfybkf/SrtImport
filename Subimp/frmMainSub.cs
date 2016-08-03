@@ -94,6 +94,8 @@ namespace Subimp
 				{
 					pack = Pack.Load(input);
 				}//if
+
+				this.Text = pack.with(z => z.Name, string.Empty);
 			}//if
 
 			ListRefresh();
