@@ -27,10 +27,17 @@ namespace Subimp
 			
 			btnDo.Click += btnDo_Click;
 			btnSave.Click += btnSave_Click;
+			btnHelp.Click += btnHelp_Click;
 			listMain.KeyUp += listMain_KeyUp;
 			ctlFind.KeyUp += ctlFind_KeyUp;
 
 			listMain.Select();
+		}
+
+		static string help_message = " - клавиатура -".addLine("F2 - редактировать", " - консольные команды -", "QUIT - сохранить экспортировать выйти");
+		void btnHelp_Click(object sender, EventArgs e)
+		{
+			MessageBox.Show(help_message);
 		}
 
 		void ctlFind_KeyUp(object sender, KeyEventArgs e)
@@ -95,7 +102,15 @@ namespace Subimp
 					pack = Pack.Load(input);
 				}//if
 
-				this.Text = pack != null ? pack.Name : "no Pack";
+				if (args.Any(z => z == "QUIT"))
+				{
+					pack.Save();
+					pack.ExportSrt();
+					pack.ExportLyr();
+					this.Close();
+				}//if
+
+				this.Text = pack.with(z => z.Name, string.Empty);
 			}//if
 
 			ListRefresh();

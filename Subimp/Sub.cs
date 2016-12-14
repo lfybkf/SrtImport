@@ -24,7 +24,7 @@ namespace Subimp
 
 		public override string ToString()
 		{
-			return "{0:D3} - {1} - {2} - {3}".fmt(
+			return "{0:D3} | {1} {2} {3}".fmt(
 				ID
 				, TmBeg.ToStr()
 				, TmFix.ToStr()

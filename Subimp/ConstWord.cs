@@ -1,5 +1,5 @@
 ﻿
-//Generated 15.12.2016 0:54:25
+//Generated 15.12.2016 1:08:44
 
 namespace Subimp
 {
@@ -7,6 +7,7 @@ namespace Subimp
 	{
 public const string Content = "Content";
 public const string Min = "Min";
+public const string QUIT = "QUIT";
 public const string Sec = "Sec";
 	}//class
 

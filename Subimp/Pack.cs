@@ -67,33 +67,39 @@ namespace Subimp
 
 		public void ImportSrt(IEnumerable<string> ss)
 		{
-			Sub item = null;
+			Sub sub = null;
 			int Num;
-			foreach (var s in ss.Where(z => z.Any()))
+			foreach (var s in ss.Where(z => z.notEmpty()))
 			{
 				if (int.TryParse(s, out Num)) //число - признак новой секции
 				{
-					if (item != null)
+					if (sub != null)
 					{
-						list.Add(item);
+						list.Add(sub);
 					}//if
 
-					item = new Sub();
+					sub = new Sub();
 					continue;
 				}//if
-				if (item != null)
+				if (sub != null)
 				{
 					if (s.Contains(STR.Arrow))
 					{
 						string parse = s.before(STR.Arrow).Trim().Replace(S.Comma, S.Point);
-						item.Ticks = TimeSpan.Parse(parse).Ticks;
+						sub.Ticks = TimeSpan.Parse(parse).Ticks;
 					}//if
 					else
 					{
-						item.Content = item.Content.Any() ? item.Content.addLine(s) : s;
+						sub.Content = sub.Content.notEmpty() ? sub.Content.addLine(s) : s;
 					}//else
 				}//if
 			}//for
+
+			//last
+			if (sub.Content.notEmpty())
+			{
+				list.Add(sub);
+			}//if
 
 			this.NumerateAndPack();
 		}//function

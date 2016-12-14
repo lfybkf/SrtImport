@@ -26,25 +26,25 @@ namespace Subimp
 		{
 			if (ts == TimeSpan.Zero)
 			{
-				return "==========";
+				//return "==========";
+				return "            ";
 			}//if
 
-			string result = "{0:D2}:{1:D2}:{2:D2},{3:D1}".fmt(
+			string result = "{0:D2}:{1:D2}:{2:D2},{3:D3}".fmt(
 				ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds);
 			return result;
 		}//func
 
 		public static string ToStrSRT(this TimeSpan ts)
 		{
-			string result = "{0:D2}:{1:D2}:{2:D2},{3:D3}".fmt(
-				ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds);
+			string result = "{0:D2}:{1:D2}:{2:D2},{3:D3}".fmt(ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds);
 			return result;
 		}//func
 
 		public static string ToStrLYR(this TimeSpan ts)
 		{
-			string result = "{0:D2}:{1:D2}:{2:D2}".fmt(
-				ts.Hours, ts.Minutes, ts.Seconds);
+			string result = ts.ToString(@"mm\:ss\.ff");
+			//string result = "{0:D2}:{1:D2}.{2}".fmt(ts.Minutes, ts.Seconds, ts.Milliseconds.ToString("00"));
 			return result;
 		}//func
 

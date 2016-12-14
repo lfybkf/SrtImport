@@ -8,6 +8,7 @@ string words = @"
 Content
 Min
 Sec
+QUIT
 ";
 #>
 //Generated <#=DateTime.Now.ToString() #>
