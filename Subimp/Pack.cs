@@ -119,9 +119,9 @@ namespace Subimp
 				{
 					m = rexOne.Match(s);
 					sub = new Sub();
-					sub.Content = m.Groups["Content"].Value;
-					Min = m.Groups["Min"].Value;
-					Sec = m.Groups["Sec"].Value;
+					sub.Content = m.Groups[W.Content].Value;
+					Min = m.Groups[W.Min].Value;
+					Sec = m.Groups[W.Sec].Value;
 					sub.TmBeg = new TimeSpan(0, Min.ToInt(), Sec.ToInt());
 					list.Add(sub);
 				}//if

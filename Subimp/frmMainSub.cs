@@ -102,7 +102,7 @@ namespace Subimp
 					pack = Pack.Load(input);
 				}//if
 
-				if (args.Any(z => z == "QUIT"))
+				if (args.Any(z => z == W.QUIT))
 				{
 					pack.Save();
 					pack.ExportSrt();
@@ -147,7 +147,7 @@ namespace Subimp
 
 		public  void ListRefresh()
 		{
-			if (pack == null)			{				return;			}//if
+			if (pack == null) { return;	}//if
 			var selected = listMain.with(z => z.SelectedItem);
 			listMain.DataSource = null;
 			listMain.DataSource = pack.Items;
