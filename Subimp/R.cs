@@ -15,9 +15,6 @@ namespace Subimp
 
 	public static class zFMT
 	{
-		//public static readonly string Ts = "hh:mm:ss";
-		//public static readonly string Te = "          ";
-		//public static readonly string Grid = "hh:mm:ss";
 		public static readonly string SrtTm = "{0}:{1}:{2},{3}";
 		public static readonly string SrtDur = "{0}:{1}";
 		public static readonly string LyrTm = "{0}:{1}.{2}";
@@ -27,9 +24,6 @@ namespace Subimp
 	public static class STR
 	{
 		public static readonly string Arrow = "-->";
-		public static readonly string Zpt = ",";
-		public static readonly string Point = ".";
-		public static readonly string Space = " ";
 	}//class
 
 	public static class EXT

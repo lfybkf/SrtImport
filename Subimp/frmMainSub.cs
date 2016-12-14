@@ -94,9 +94,20 @@ namespace Subimp
 				{
 					pack = Pack.Load(input);
 				}//if
+
+				this.Text = pack != null ? pack.Name : "no Pack";
 			}//if
 
 			ListRefresh();
+
+			doStart();
+		}
+
+		private void doStart()
+		{
+			pack.Save();
+			pack.ExportSrt();
+			pack.ExportLyr();
 		}//function
 
 		public  void Info(string s)

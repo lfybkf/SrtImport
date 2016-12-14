@@ -85,7 +85,7 @@ namespace Subimp
 				{
 					if (s.Contains(STR.Arrow))
 					{
-						string parse = s.before(STR.Arrow).Trim().Replace(STR.Zpt, STR.Point);
+						string parse = s.before(STR.Arrow).Trim().Replace(S.Comma, S.Point);
 						item.Ticks = TimeSpan.Parse(parse).Ticks;
 					}//if
 					else
