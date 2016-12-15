@@ -27,6 +27,7 @@ namespace Subimp
 			
 			btnDo.Click += btnDo_Click;
 			btnSave.Click += btnSave_Click;
+			btnSaveFix.Click += btnSaveFix_Click;
 			btnHelp.Click += btnHelp_Click;
 			listMain.KeyUp += listMain_KeyUp;
 			ctlFind.KeyUp += ctlFind_KeyUp;
@@ -34,7 +35,13 @@ namespace Subimp
 			listMain.Select();
 		}
 
-		static string help_message = " - клавиатура -".addLine("F2 - редактировать", " - консольные команды -", "QUIT - сохранить экспортировать выйти");
+		private void btnSaveFix_Click(object sender, EventArgs e)
+		{
+			pack.SaveFix();
+			Info("save fix");
+		}
+
+		static string help_message = " - клавиатура -".addLine("F2 - редактировать", "F3 - искать", "Escape - переход в список", "Delete - удалить", " - консольные команды -", "QUIT - сохранить экспортировать выйти");
 		void btnHelp_Click(object sender, EventArgs e)
 		{
 			MessageBox.Show(help_message);
@@ -90,6 +97,7 @@ namespace Subimp
 					var ss = io.File.ReadAllLines(input);
 					pack = new Pack(io.Path.GetFileNameWithoutExtension(input));
 					pack.ImportSrt(ss);
+					pack.MergeFix();
 				}//if
 				else if (input.EndsWith(EXT.Lyr))
 				{

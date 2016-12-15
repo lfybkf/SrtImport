@@ -31,6 +31,15 @@ namespace Subimp
 				, Content);
 		}
 
+		public static int MaxLength = 50;
+		public void NormalizeContent()
+		{
+			if (Content.Contains(Environment.NewLine) && Content.Length > MaxLength)
+			{
+				;
+			}//if
+		}//function
+
 		internal Sub Next { get { return pack.Items.SkipWhile(z => z.ID <= this.ID).FirstOrDefault(); } }
 		internal TimeSpan TmDur { get { return TmEnd - TmBeg; } }
 		internal TimeSpan TmEnd { 
@@ -79,6 +88,11 @@ namespace Subimp
 			{
 				return TmFix != TS.Zero;
 			}
+		}
+
+		internal void Fix()
+		{
+			this.Ticks = this.Ficks;
 		}
 	}//class
 }//namespace

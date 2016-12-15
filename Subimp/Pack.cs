@@ -62,7 +62,27 @@ namespace Subimp
 			string json = io.File.ReadAllText(path);
 			pack = json.Deserialize<Pack>();
 			pack.NumerateAndPack();
+			pack.MergeFix();
 			return pack;
+		}//function
+
+		internal void MergeFix()
+		{
+			var fixes = Fix.Load(Name);
+			if (fixes.Any() == false)
+			{
+				return;
+			}//if
+
+			Fix fix;
+			foreach (var sub in this.Items.Where(z => z.Ficks == 0))
+			{
+				fix = fixes.FirstOrDefault(z => z.Content == sub.Content);
+				if (fix != null)
+				{
+					sub.Ficks = fix.Ficks;
+				}//if
+			}//for
 		}//function
 
 		public void ImportSrt(IEnumerable<string> ss)
@@ -90,7 +110,7 @@ namespace Subimp
 					}//if
 					else
 					{
-						sub.Content = sub.Content.notEmpty() ? sub.Content.addLine(s) : s;
+						sub.Content = sub.Content.addLine(s.Trim());
 					}//else
 				}//if
 			}//for
@@ -130,12 +150,15 @@ namespace Subimp
 			this.NumerateAndPack();
 		}//function
 
-		public  void Save()
+		public void Save()
 		{
 			string json = this.Serialize();
 			io.File.WriteAllText(Name + EXT.Json, json);
+		}//function
 
-			var fixes = this.Items.Select(sub => new Fix { Content = sub.Content, Ficks = sub.Ficks });
+		public void SaveFix()
+		{
+			var fixes = this.Items.Where(z => z.Ficks > 0).Select(sub => new Fix { Content = sub.Content, Ficks = sub.Ficks });
 			Fix.Save(fixes, this.Name);
 		}//function
 
@@ -158,29 +181,19 @@ namespace Subimp
 			Numerate();
 
 			#region create ivals
-			List<Ival> ivals = new List<Ival>();
-			Ival ival = null;
-			Sub sub = null;
-			for (int i = 0; i < list.Count; i++)
-			{
-				sub = list[i];
-				if (sub.IsIvalable && ival == null)
-				{
-					ival = new Ival { beg = sub };
-				}//if
-				else if (sub.IsIvalable && ival != null)
-				{
-					ival.end = sub;
-					ivals.Add(ival);
-					ival = null;
-				}//if
-			}//for
+			Sub[] subs = Items.Where(z => z.Ficks > 0).ToArray();
+			if (subs.Length <= 1)			{				return;			}//if
+
+			var subsBeg = subs.Take(subs.Length - 1);
+			var subsEnd = subs.Skip(1);
+			Ival[] ivals = subsBeg.Zip(subsEnd, (Beg, End) => new Ival { beg = Beg, end = End }).ToArray();
 			#endregion
 
 			foreach (var item in ivals)
 			{
 				Retime(item);
-			}
+			}//for
+			ivals.LastOrDefault().end.Fix();
 		}//function
 
 		void Retime(Ival ival)
@@ -189,27 +202,25 @@ namespace Subimp
 			long tiBeg = ival.beg.Ticks;
 			long tiEndFix = ival.end.Ficks;
 			long tiEnd = ival.end.Ticks;
-
 			double K = (double)(tiEndFix - tiBegFix) / (double)(tiEnd - tiBeg);
 
-			Sub sub=null;
+			IEnumerable<Sub> subs = Items.SkipWhile(z => z.ID <= ival.beg.ID).TakeWhile(z => z.ID < ival.end.ID);
 			long lenFromBeg;
 			double lenFromBegFix;
-			for (int i = 0; i < list.Count; i++)
+			foreach (Sub sub in subs)
 			{
-				sub = list[i];
-				if (sub.ID < ival.beg.ID) { continue; }
-				if (sub.ID > ival.end.ID) { break; }
-				if (sub.ID == ival.end.ID || sub.ID == ival.beg.ID) { sub.Ticks = sub.Ficks; continue; }
-
 				lenFromBeg = sub.Ticks - tiBeg;
 				lenFromBegFix = lenFromBeg * K;
 				sub.Ticks = tiBegFix + (long)lenFromBegFix;
 			}//for
+
+			//исправляем начало. конец не трогаем, он будет опорой для следующего интервала. конец последнего исправим в другом месте
+			ival.beg.Fix();
+
 		}//function
 
 
-		public  Sub Find(string s, Sub previous = null)
+		public Sub Find(string s, Sub previous = null)
 		{
 			IEnumerable<Sub> listToFind = (previous == null) ? list : list.SkipWhile(z => !z.Equals(previous)).Skip(1);
 			return listToFind.FirstOrDefault(z => z.Content.Contains(s));

@@ -29,16 +29,18 @@
 		private void InitializeComponent()
 		{
 			this.panManage = new System.Windows.Forms.Panel();
+			this.btnHelp = new System.Windows.Forms.Button();
 			this.ctlFind = new System.Windows.Forms.TextBox();
 			this.btnSave = new System.Windows.Forms.Button();
 			this.btnDo = new System.Windows.Forms.Button();
 			this.listMain = new System.Windows.Forms.ListBox();
-			this.btnHelp = new System.Windows.Forms.Button();
+			this.btnSaveFix = new System.Windows.Forms.Button();
 			this.panManage.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// panManage
 			// 
+			this.panManage.Controls.Add(this.btnSaveFix);
 			this.panManage.Controls.Add(this.btnHelp);
 			this.panManage.Controls.Add(this.ctlFind);
 			this.panManage.Controls.Add(this.btnSave);
@@ -49,10 +51,21 @@
 			this.panManage.Size = new System.Drawing.Size(962, 38);
 			this.panManage.TabIndex = 0;
 			// 
+			// btnHelp
+			// 
+			this.btnHelp.AutoSize = true;
+			this.btnHelp.Dock = System.Windows.Forms.DockStyle.Right;
+			this.btnHelp.Location = new System.Drawing.Point(775, 0);
+			this.btnHelp.Name = "btnHelp";
+			this.btnHelp.Size = new System.Drawing.Size(87, 38);
+			this.btnHelp.TabIndex = 3;
+			this.btnHelp.Text = "Help";
+			this.btnHelp.UseVisualStyleBackColor = true;
+			// 
 			// ctlFind
 			// 
-			this.ctlFind.Dock = System.Windows.Forms.DockStyle.Left;
-			this.ctlFind.Location = new System.Drawing.Point(174, 0);
+			this.ctlFind.Dock = System.Windows.Forms.DockStyle.Right;
+			this.ctlFind.Location = new System.Drawing.Point(862, 0);
 			this.ctlFind.Name = "ctlFind";
 			this.ctlFind.Size = new System.Drawing.Size(100, 26);
 			this.ctlFind.TabIndex = 2;
@@ -90,16 +103,16 @@
 			this.listMain.Size = new System.Drawing.Size(962, 422);
 			this.listMain.TabIndex = 1;
 			// 
-			// btnHelp
+			// btnSaveFix
 			// 
-			this.btnHelp.AutoSize = true;
-			this.btnHelp.Dock = System.Windows.Forms.DockStyle.Left;
-			this.btnHelp.Location = new System.Drawing.Point(274, 0);
-			this.btnHelp.Name = "btnHelp";
-			this.btnHelp.Size = new System.Drawing.Size(87, 38);
-			this.btnHelp.TabIndex = 3;
-			this.btnHelp.Text = "Help";
-			this.btnHelp.UseVisualStyleBackColor = true;
+			this.btnSaveFix.AutoSize = true;
+			this.btnSaveFix.Dock = System.Windows.Forms.DockStyle.Left;
+			this.btnSaveFix.Location = new System.Drawing.Point(174, 0);
+			this.btnSaveFix.Name = "btnSaveFix";
+			this.btnSaveFix.Size = new System.Drawing.Size(87, 38);
+			this.btnSaveFix.TabIndex = 4;
+			this.btnSaveFix.Text = "SaveFix";
+			this.btnSaveFix.UseVisualStyleBackColor = true;
 			// 
 			// frmMainSub
 			// 
@@ -126,6 +139,7 @@
 		private System.Windows.Forms.Button btnSave;
 		private System.Windows.Forms.TextBox ctlFind;
 		private System.Windows.Forms.Button btnHelp;
+		private System.Windows.Forms.Button btnSaveFix;
 	}
 }
 
