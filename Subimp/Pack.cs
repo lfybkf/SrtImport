@@ -134,6 +134,9 @@ namespace Subimp
 		{
 			string json = this.Serialize();
 			io.File.WriteAllText(Name + EXT.Json, json);
+
+			var fixes = this.Items.Select(sub => new Fix { Content = sub.Content, Ficks = sub.Ficks });
+			Fix.Save(fixes, this.Name);
 		}//function
 
 		internal void ExportSrt()
