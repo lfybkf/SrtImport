@@ -82,11 +82,11 @@ namespace Subimp
 			this.pack = pack;
 		}//function
 
-		internal bool IsIvalable
+		internal bool HasFix
 		{
 			get
 			{
-				return TmFix != TS.Zero;
+				return Ficks > 0;
 			}
 		}
 

@@ -15,6 +15,7 @@ namespace Subimp
 		{
 			public Sub beg;
 			public Sub end;
+			public int Count;
 
 			public override string ToString()
 			{
@@ -176,18 +177,28 @@ namespace Subimp
 			io.File.WriteAllLines(path, output);
 		}
 
+
+		private IEnumerable<Ival> getIvals()
+		{
+			Sub[] subs = Items.Where(z => z.Ficks > 0).ToArray();
+			if (subs.Length <= 1) { return Enumerable.Empty<Ival>() ; }//if
+
+			var subsBeg = subs.Take(subs.Length - 1);
+			var subsEnd = subs.Skip(1);
+			return subsBeg.Zip(subsEnd, (Beg, End) => new Ival { beg = Beg, end = End });
+		}//function
+
+		/// <summary>НЕвключительный список</summary>
+		private IEnumerable<Sub> getSubs(Ival ival)
+		{
+			return Items.SkipWhile(z => z.ID <= ival.beg.ID).TakeWhile(z => z.ID < ival.end.ID);
+		}//function
+
 		internal void Retime()
 		{
 			Numerate();
 
-			#region create ivals
-			Sub[] subs = Items.Where(z => z.Ficks > 0).ToArray();
-			if (subs.Length <= 1)			{				return;			}//if
-
-			var subsBeg = subs.Take(subs.Length - 1);
-			var subsEnd = subs.Skip(1);
-			Ival[] ivals = subsBeg.Zip(subsEnd, (Beg, End) => new Ival { beg = Beg, end = End }).ToArray();
-			#endregion
+			Ival[] ivals = getIvals().ToArray();
 
 			foreach (var item in ivals)
 			{
@@ -204,7 +215,7 @@ namespace Subimp
 			long tiEnd = ival.end.Ticks;
 			double K = (double)(tiEndFix - tiBegFix) / (double)(tiEnd - tiBeg);
 
-			IEnumerable<Sub> subs = Items.SkipWhile(z => z.ID <= ival.beg.ID).TakeWhile(z => z.ID < ival.end.ID);
+			IEnumerable<Sub> subs = getSubs(ival);
 			long lenFromBeg;
 			double lenFromBegFix;
 			foreach (Sub sub in subs)
@@ -219,7 +230,6 @@ namespace Subimp
 
 		}//function
 
-
 		public Sub Find(string s, Sub previous = null)
 		{
 			IEnumerable<Sub> listToFind = (previous == null) ? list : list.SkipWhile(z => !z.Equals(previous)).Skip(1);
@@ -230,6 +240,33 @@ namespace Subimp
 		{
 			list.Remove(sub);
 			Numerate();
-		}
+		}//function
+
+		/// <summary>лучший кандидат на фикс</summary>
+		public Sub BestCandidat()
+		{
+			var ivals = getIvals().ToArray();
+			if (ivals.Any()==false)
+			{
+				if (!Items.First().HasFix)
+				{
+					return Items.First();
+				}//if
+				else
+				{
+					return Items.Last();
+				}//else
+			}//if
+
+			//считаем длины интервалов
+			ivals.forEach(z => z.Count = getSubs(z).Count());
+			//считаем максимальную длину
+			int max = ivals.Max(z => z.Count);
+			//ищем интервал с макс. длиной
+			var ivalWithMax = ivals.First(z => z.Count == max);
+			//ищем саб в середине этого интервала
+			return getSubs(ivalWithMax).Skip(max / 2).First();
+
+		}//function
 	}//class
 }//namespace

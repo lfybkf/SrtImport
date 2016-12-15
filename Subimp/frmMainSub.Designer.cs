@@ -29,17 +29,19 @@
 		private void InitializeComponent()
 		{
 			this.panManage = new System.Windows.Forms.Panel();
+			this.btnSaveFix = new System.Windows.Forms.Button();
 			this.btnHelp = new System.Windows.Forms.Button();
 			this.ctlFind = new System.Windows.Forms.TextBox();
 			this.btnSave = new System.Windows.Forms.Button();
 			this.btnDo = new System.Windows.Forms.Button();
 			this.listMain = new System.Windows.Forms.ListBox();
-			this.btnSaveFix = new System.Windows.Forms.Button();
+			this.btnBest = new System.Windows.Forms.Button();
 			this.panManage.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// panManage
 			// 
+			this.panManage.Controls.Add(this.btnBest);
 			this.panManage.Controls.Add(this.btnSaveFix);
 			this.panManage.Controls.Add(this.btnHelp);
 			this.panManage.Controls.Add(this.ctlFind);
@@ -50,6 +52,17 @@
 			this.panManage.Name = "panManage";
 			this.panManage.Size = new System.Drawing.Size(962, 38);
 			this.panManage.TabIndex = 0;
+			// 
+			// btnSaveFix
+			// 
+			this.btnSaveFix.AutoSize = true;
+			this.btnSaveFix.Dock = System.Windows.Forms.DockStyle.Left;
+			this.btnSaveFix.Location = new System.Drawing.Point(174, 0);
+			this.btnSaveFix.Name = "btnSaveFix";
+			this.btnSaveFix.Size = new System.Drawing.Size(94, 38);
+			this.btnSaveFix.TabIndex = 4;
+			this.btnSaveFix.Text = "SaveFix";
+			this.btnSaveFix.UseVisualStyleBackColor = true;
 			// 
 			// btnHelp
 			// 
@@ -67,7 +80,7 @@
 			this.ctlFind.Dock = System.Windows.Forms.DockStyle.Right;
 			this.ctlFind.Location = new System.Drawing.Point(862, 0);
 			this.ctlFind.Name = "ctlFind";
-			this.ctlFind.Size = new System.Drawing.Size(100, 26);
+			this.ctlFind.Size = new System.Drawing.Size(100, 30);
 			this.ctlFind.TabIndex = 2;
 			// 
 			// btnSave
@@ -97,26 +110,26 @@
 			this.listMain.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.listMain.Font = new System.Drawing.Font("Courier New", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
 			this.listMain.FormattingEnabled = true;
-			this.listMain.ItemHeight = 21;
+			this.listMain.ItemHeight = 27;
 			this.listMain.Location = new System.Drawing.Point(0, 0);
 			this.listMain.Name = "listMain";
 			this.listMain.Size = new System.Drawing.Size(962, 422);
 			this.listMain.TabIndex = 1;
 			// 
-			// btnSaveFix
+			// btnBest
 			// 
-			this.btnSaveFix.AutoSize = true;
-			this.btnSaveFix.Dock = System.Windows.Forms.DockStyle.Left;
-			this.btnSaveFix.Location = new System.Drawing.Point(174, 0);
-			this.btnSaveFix.Name = "btnSaveFix";
-			this.btnSaveFix.Size = new System.Drawing.Size(87, 38);
-			this.btnSaveFix.TabIndex = 4;
-			this.btnSaveFix.Text = "SaveFix";
-			this.btnSaveFix.UseVisualStyleBackColor = true;
+			this.btnBest.AutoSize = true;
+			this.btnBest.Dock = System.Windows.Forms.DockStyle.Left;
+			this.btnBest.Location = new System.Drawing.Point(268, 0);
+			this.btnBest.Name = "btnBest";
+			this.btnBest.Size = new System.Drawing.Size(94, 38);
+			this.btnBest.TabIndex = 5;
+			this.btnBest.Text = "Best";
+			this.btnBest.UseVisualStyleBackColor = true;
 			// 
 			// frmMainSub
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+			this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(962, 460);
 			this.Controls.Add(this.listMain);
@@ -140,6 +153,7 @@
 		private System.Windows.Forms.TextBox ctlFind;
 		private System.Windows.Forms.Button btnHelp;
 		private System.Windows.Forms.Button btnSaveFix;
+		private System.Windows.Forms.Button btnBest;
 	}
 }
 

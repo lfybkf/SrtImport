@@ -29,10 +29,17 @@ namespace Subimp
 			btnSave.Click += btnSave_Click;
 			btnSaveFix.Click += btnSaveFix_Click;
 			btnHelp.Click += btnHelp_Click;
+			btnBest.Click += btnBest_Click;
 			listMain.KeyUp += listMain_KeyUp;
 			ctlFind.KeyUp += ctlFind_KeyUp;
 
 			listMain.Select();
+		}
+
+		private void btnBest_Click(object sender, EventArgs e)
+		{
+			Sub sub = pack.BestCandidat();
+			listMain.SelectedItem = sub;
 		}
 
 		private void btnSaveFix_Click(object sender, EventArgs e)
