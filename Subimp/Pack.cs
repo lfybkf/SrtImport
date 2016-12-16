@@ -26,6 +26,8 @@ namespace Subimp
 		public string Name {get;set;}
 		List<Sub> list = new List<Sub>();
 		public IEnumerable<Sub> Items { get { return list; } set { list.AddRange(value); } }
+		public IEnumerable<Sub> ItemsFixed { get { return Items.Where(z => z.HasFix); } }
+		public IEnumerable<Sub> ItemsUnFixed { get { return Items.Where(z => z.HasFix == false); } }
 
 		public Pack()
 		{
@@ -76,11 +78,13 @@ namespace Subimp
 			}//if
 
 			Fix fix;
-			foreach (var sub in this.Items.Where(z => z.Ficks == 0))
+			foreach (var sub in this.ItemsUnFixed)
 			{
 				fix = fixes.FirstOrDefault(z => z.Content == sub.Content);
 				if (fix != null)
 				{
+					if (this.ItemsFixed.Where(z => z.ID < sub.ID).Any(z => z.Ficks > fix.Ficks)) 	{ continue;	}//if
+					if (this.ItemsFixed.Where(z => z.ID > sub.ID).Any(z => z.Ficks < fix.Ficks)) { continue; }//if
 					sub.Ficks = fix.Ficks;
 				}//if
 			}//for
@@ -267,6 +271,11 @@ namespace Subimp
 			//ищем саб в середине этого интервала
 			return getSubs(ivalWithMax).Skip(max / 2).First();
 
+		}//function
+
+		public Sub FindOnContent(string content)
+		{
+			return Items.FirstOrDefault(z => z.Content == content);
 		}//function
 	}//class
 }//namespace

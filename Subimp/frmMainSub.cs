@@ -39,7 +39,8 @@ namespace Subimp
 		private void btnBest_Click(object sender, EventArgs e)
 		{
 			Sub sub = pack.BestCandidat();
-			listMain.SelectedItem = sub;
+			//listMain.SelectedItem = sub;
+			SelectedSub = sub;
 		}
 
 		private void btnSaveFix_Click(object sender, EventArgs e)
@@ -48,7 +49,15 @@ namespace Subimp
 			Info("save fix");
 		}
 
-		static string help_message = " - клавиатура -".addLine("F2 - редактировать", "F3 - искать", "Escape - переход в список", "Delete - удалить", " - консольные команды -", "QUIT - сохранить экспортировать выйти");
+		static string help_message = " - клавиатура -".addLine(
+			"F2 - редактировать", 
+			"F3 - искать",
+			"F4 - следующий фикс",
+			"Space - кандидат",
+			"Escape - переход в список", 
+			"Delete - удалить", 
+			" - консольные команды -", 
+			"QUIT - сохранить экспортировать выйти");
 		void btnHelp_Click(object sender, EventArgs e)
 		{
 			MessageBox.Show(help_message);
@@ -67,6 +76,58 @@ namespace Subimp
 			}//if
 		}
 
+
+		void doEdit(Sub sub)
+		{
+			frmEdit frm = new frmEdit();
+			frm.Tm = sub.TmBeg;
+			frm.Content = sub.Content;
+			if (frm.ShowDialog() == DialogResult.OK)
+			{
+				var updFicks = frm.Tm.Ticks;
+				var updContent = frm.Content;
+				bool CanUpdateFicks = true;
+				bool CanUpdateContent = true;
+
+				var subErr = pack.Items.FirstOrDefault(z => z.Content == updContent && z.HasFix && z.ID != sub.ID);
+				if (subErr != null)
+				{
+					MessageBox.Show("{0} has fixed content - {1}".fmt(subErr.ID, updContent));
+					CanUpdateFicks = false;
+				}//if
+				else if ((subErr = pack.Items.Where(z => z.ID < sub.ID && z.HasFix).FirstOrDefault(z => z.Ficks >= updFicks)) != null)
+				{
+					MessageBox.Show("{0} has fixed content before where Ficks >= {1}".fmt(subErr.ID, new TimeSpan(updFicks).ToStr() ));
+					CanUpdateFicks = false;
+				}//if
+				else if ((subErr = pack.Items.Where(z => z.ID > sub.ID && z.HasFix).FirstOrDefault(z => z.Ficks <= updFicks)) != null)
+				{
+					MessageBox.Show("{0} has fixed content after where Ficks <= {1}".fmt(subErr.ID, new TimeSpan(updFicks).ToStr()));
+					CanUpdateFicks = false;
+				}//if
+
+				if (updContent.isEmpty())
+				{
+					MessageBox.Show("Content is empty");
+					CanUpdateContent = false;
+				}//if
+				if (sub.Content == updContent)
+				{
+					//MessageBox.Show("Content is not change");
+					CanUpdateContent = false;
+				}//if
+
+				if (CanUpdateFicks) { sub.Ficks = updFicks; }//if
+				if (CanUpdateContent) { sub.Content = updContent; }//if
+
+				if (CanUpdateContent || CanUpdateFicks)
+				{
+					ListRefresh();
+				}//if
+				
+			}//if
+		}//function
+
 		void listMain_KeyUp(object sender, KeyEventArgs e)
 		{
 			Sub sub = SelectedSub;
@@ -75,21 +136,30 @@ namespace Subimp
 				pack.Remove(sub);
 				ListRefresh();
 			}//if
+			else if (e.KeyCode == Keys.Space)
+			{
+				btnBest_Click(sender, e);
+			}//if
 			else if (e.KeyCode == Keys.F2 && sub != null)
 			{
-				frmEdit frm = new frmEdit();
-				frm.Tm = sub.TmBeg;
-				frm.Content = sub.Content;
-				if (frm.ShowDialog() == DialogResult.OK)
-				{
-					sub.Ficks = frm.Tm.Ticks;
-					sub.Content = frm.Content;
-					ListRefresh();
-				}//if
+				doEdit(sub);
 			}//if
 			else if (e.KeyCode == Keys.F3)
 			{
 				ctlFind.Select();
+			}//if
+			else if (e.KeyCode == Keys.F4)
+			{
+				doGoToNextFix(sub);
+			}//if
+		}//function
+
+		private void doGoToNextFix(Sub sub)
+		{
+			Sub next = pack.Items.FirstOrDefault(z => z.ID > sub.ID && z.HasFix) ?? pack.Items.FirstOrDefault(z => z.HasFix);
+			if (next != null)
+			{
+				SelectedSub = next;
 			}//if
 		}//function
 

@@ -10,7 +10,7 @@ namespace Subimp
 {
 	public partial class frmEdit : Form
 	{
-		public TimeSpan Tm;
+		public TimeSpan Tm { get; set; }
 		public string Content;
 		DateTime Dt = new DateTime(2000, 1, 1);
 
