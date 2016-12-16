@@ -89,10 +89,10 @@ namespace Subimp
 				bool CanUpdateFicks = true;
 				bool CanUpdateContent = true;
 
-				var subErr = pack.Items.FirstOrDefault(z => z.Content == updContent && z.HasFix && z.ID != sub.ID);
+				var subErr = pack.Items.FirstOrDefault(z => z.Content == updContent && z.ID != sub.ID);
 				if (subErr != null)
 				{
-					MessageBox.Show("{0} has fixed content - {1}".fmt(subErr.ID, updContent));
+					MessageBox.Show("{0} has same content - {1}".fmt(subErr.ID, updContent));
 					CanUpdateFicks = false;
 				}//if
 				else if ((subErr = pack.Items.Where(z => z.ID < sub.ID && z.HasFix).FirstOrDefault(z => z.Ficks >= updFicks)) != null)
@@ -205,6 +205,7 @@ namespace Subimp
 
 		private void doStart()
 		{
+			ctlDir.Text = DIR.Srt;
 			pack.Save();
 			pack.ExportSrt();
 			pack.ExportLyr();
@@ -223,6 +224,12 @@ namespace Subimp
 
 		void btnDo_Click(object sender, EventArgs e)
 		{
+			string dir = ctlDir.Text;
+			if (dir.notEmpty() && io.Directory.Exists(dir))
+			{
+				DIR.Srt = dir;
+			}//if
+
 			pack.Retime();
 			pack.ExportSrt();
 			pack.ExportLyr();

@@ -78,13 +78,13 @@ namespace Subimp
 			}//if
 
 			Fix fix;
-			foreach (var sub in this.ItemsUnFixed)
+			foreach (var sub in this.Items)
 			{
 				fix = fixes.FirstOrDefault(z => z.Content == sub.Content);
 				if (fix != null)
 				{
-					if (this.ItemsFixed.Where(z => z.ID < sub.ID).Any(z => z.Ficks > fix.Ficks)) 	{ continue;	}//if
-					if (this.ItemsFixed.Where(z => z.ID > sub.ID).Any(z => z.Ficks < fix.Ficks)) { continue; }//if
+					//if (this.ItemsFixed.Where(z => z.ID < sub.ID).Any(z => z.Ficks > fix.Ficks)) 	{ continue;	}//if
+					//if (this.ItemsFixed.Where(z => z.ID > sub.ID).Any(z => z.Ficks < fix.Ficks)) { continue; }//if
 					sub.Ficks = fix.Ficks;
 				}//if
 			}//for
@@ -249,19 +249,22 @@ namespace Subimp
 		/// <summary>лучший кандидат на фикс</summary>
 		public Sub BestCandidat()
 		{
-			var ivals = getIvals().ToArray();
-			if (ivals.Any()==false)
-			{
-				if (!Items.First().HasFix)
-				{
-					return Items.First();
-				}//if
-				else
-				{
-					return Items.Last();
-				}//else
-			}//if
+			if (!Items.First().HasFix)
+			{	return Items.First();	}//if
+			else if (!Items.Last().HasFix)
+			{	return Items.Last(); }//else
 
+			//по максимальному разрыву
+			//список сабов с разрывом до следующего
+			var diffs = Items.Take(Items.Count() - 1)
+				.Zip(Items.Skip(1), (one, two) => new { sub = one, diff = two.Ticks - one.Ticks })
+				.ToArray();
+			//максимальный разрыв
+			long max_diff = diffs.Where(z => z.sub.HasFix == false).Max(z => z.diff);
+			return diffs.First(z => z.diff == max_diff).sub;
+
+			/** поиск по середине
+			var ivals = getIvals().ToArray();
 			//считаем длины интервалов
 			ivals.forEach(z => z.Count = getSubs(z).Count());
 			//считаем максимальную длину
@@ -270,7 +273,7 @@ namespace Subimp
 			var ivalWithMax = ivals.First(z => z.Count == max);
 			//ищем саб в середине этого интервала
 			return getSubs(ivalWithMax).Skip(max / 2).First();
-
+			*/
 		}//function
 
 		public Sub FindOnContent(string content)
