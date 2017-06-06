@@ -33,6 +33,7 @@ namespace Subimp
 		public static readonly string Srt = ".srt";
 		public static readonly string Lyr = ".lrc";
 		public static readonly string Trn = ".trn";
+		public static readonly string Arh = ".arh";
 	}//class
 
 	public static class FILTER
@@ -44,8 +45,8 @@ namespace Subimp
 
 	public static class DIR
 	{
-		public static string Srt = @"C:\Temp";
-		public static string Lyr = @"C:\Temp";
+		public static string Srt => Settings.Instance.DirOutSrt;
+		public static string Lyr => Settings.Instance.DirOutLyr;
 		public static string Cur = Environment.CurrentDirectory;
 	}//class
 

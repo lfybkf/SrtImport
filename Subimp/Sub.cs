@@ -9,7 +9,7 @@ namespace Subimp
 		public int ID { get; set; }
 		public long Ticks { get { return TmBeg.Ticks; } set { TmBeg = new TimeSpan(value); } }
 		public long Ficks { get { return TmFix.Ticks; } set { TmFix = new TimeSpan(value); } }
-		public string Content { get; set; }
+		public string Content { get; set; } = string.Empty;
 		internal TimeSpan TmBeg;
 		internal TimeSpan TmFix;
 		
@@ -30,15 +30,6 @@ namespace Subimp
 				, TmFix.ToStr()
 				, Content);
 		}
-
-		public static int MaxLength = 50;
-		public void NormalizeContent()
-		{
-			if (Content.Contains(Environment.NewLine) && Content.Length > MaxLength)
-			{
-				;
-			}//if
-		}//function
 
 		internal Sub Next { get { return pack.Items.SkipWhile(z => z.ID <= this.ID).FirstOrDefault(); } }
 		internal TimeSpan TmDur { get { return TmEnd - TmBeg; } }
@@ -63,36 +54,11 @@ namespace Subimp
 				}//else
 			} }
 
-		public  string toSrt()
-		{
-			return ID.ToString()
-						.addLine(
-						"{0} --> {1}".fmt(TmBeg.ToStrSRT(), TmEnd.ToStrSRT())
-						, Content
-						, string.Empty);
-		}//function
+		public string toSrt() => ID.ToString().addLine($"{TmBeg.ToStrSRT()} --> {TmEnd.ToStrSRT()}", Content, string.Empty);
+		public string toLyr() => $"[{TmBeg.ToStrLYR()}]{Content}";
+		public bool HasFix => Ficks > 0;
 
-		public  string toLyr()
-		{
-			return "[{0}]{1}".fmt(TmBeg.ToStrLYR(), Content);
-		}//function
-
-		public void setPack(Pack pack)
-		{
-			this.pack = pack;
-		}//function
-
-		internal bool HasFix
-		{
-			get
-			{
-				return Ficks > 0;
-			}
-		}
-
-		internal void Fix()
-		{
-			this.Ticks = this.Ficks;
-		}
+		public void setPack(Pack pack) { this.pack = pack; }//function
+		internal void Fix()	{	this.Ticks = this.Ficks; }
 	}//class
 }//namespace

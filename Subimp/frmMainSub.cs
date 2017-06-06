@@ -49,15 +49,22 @@ namespace Subimp
 			Info("save fix");
 		}
 
-		static string help_message = " - клавиатура -".addLine(
+		static string help_message = string.Empty.addLine(
+			" - клавиатура -",
 			"F2 - редактировать", 
 			"F3 - искать",
 			"F4 - следующий фикс",
 			"Space - кандидат",
 			"Escape - переход в список", 
 			"Delete - удалить", 
+			string.Empty, 
 			" - консольные команды -", 
-			"QUIT - сохранить экспортировать выйти");
+			"QUIT - сохранить экспортировать выйти",
+			string.Empty,
+			" - ini -",
+			"DirOutSrt DirOutLyr MinStringLength"
+			);
+
 		void btnHelp_Click(object sender, EventArgs e)
 		{
 			MessageBox.Show(help_message);
@@ -92,17 +99,17 @@ namespace Subimp
 				var subErr = pack.Items.FirstOrDefault(z => z.Content == updContent && z.ID != sub.ID);
 				if (subErr != null)
 				{
-					MessageBox.Show("{0} has same content - {1}".fmt(subErr.ID, updContent));
+					MessageBox.Show($"{subErr.ID} has same content - {updContent}");
 					CanUpdateFicks = false;
 				}//if
 				else if ((subErr = pack.Items.Where(z => z.ID < sub.ID && z.HasFix).FirstOrDefault(z => z.Ficks >= updFicks)) != null)
 				{
-					MessageBox.Show("{0} has fixed content before where Ficks >= {1}".fmt(subErr.ID, new TimeSpan(updFicks).ToStr() ));
+					MessageBox.Show($"{subErr.ID} has fixed content before where Ficks >= {new TimeSpan(updFicks).ToStr()}");
 					CanUpdateFicks = false;
 				}//if
 				else if ((subErr = pack.Items.Where(z => z.ID > sub.ID && z.HasFix).FirstOrDefault(z => z.Ficks <= updFicks)) != null)
 				{
-					MessageBox.Show("{0} has fixed content after where Ficks <= {1}".fmt(subErr.ID, new TimeSpan(updFicks).ToStr()));
+					MessageBox.Show($"{subErr.ID} has fixed content after where Ficks <= {new TimeSpan(updFicks).ToStr()}");
 					CanUpdateFicks = false;
 				}//if
 
@@ -165,6 +172,13 @@ namespace Subimp
 
 		void frmMainSub_Load(object sender, EventArgs e)
 		{
+			#region settings
+			Ini ini = Ini.Load("subimp.ini");
+			if (ini != null) { Settings.Instance = ini.DeSerialize<Settings>(); }
+			if (Settings.Instance == null) { Settings.Instance = new Settings(); }
+			#endregion
+
+			#region args work
 			string[] args = Environment.GetCommandLineArgs();
 			if (args.Length > 1)
 			{
@@ -197,18 +211,18 @@ namespace Subimp
 
 				this.Text = pack.with(z => z.Name, string.Empty);
 			}//if
+			#endregion
 
 			ListRefresh();
 
 			doStart();
-		}
+		}//func
 
 		private void doStart()
 		{
-			ctlDir.Text = DIR.Srt;
 			pack.Save();
-			pack.ExportSrt();
-			pack.ExportLyr();
+			//pack.ExportSrt();
+			//pack.ExportLyr();
 		}//function
 
 		public  void Info(string s)
@@ -224,12 +238,6 @@ namespace Subimp
 
 		void btnDo_Click(object sender, EventArgs e)
 		{
-			string dir = ctlDir.Text;
-			if (dir.notEmpty() && io.Directory.Exists(dir))
-			{
-				DIR.Srt = dir;
-			}//if
-
 			pack.Retime();
 			pack.ExportSrt();
 			pack.ExportLyr();

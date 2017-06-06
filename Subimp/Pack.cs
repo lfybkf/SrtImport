@@ -15,12 +15,9 @@ namespace Subimp
 		{
 			public Sub beg;
 			public Sub end;
-			public int Count;
+			//public int Count;
 
-			public override string ToString()
-			{
-				return "{0} ({1}) -> {2} ({3})".fmt(beg.TmBeg.ToStrSRT(), beg.TmFix.ToStrSRT(), end.TmBeg.ToStrSRT(), end.TmFix.ToStrSRT());
-			}
+			public override string ToString() => $"{beg.TmBeg.ToStrSRT()} ({beg.TmFix.ToStrSRT()}) -> {end.TmBeg.ToStrSRT()} ({end.TmFix.ToStrSRT()})";
 		}//class
 
 		public string Name {get;set;}
@@ -81,24 +78,29 @@ namespace Subimp
 			foreach (var sub in this.Items)
 			{
 				fix = fixes.FirstOrDefault(z => z.Content == sub.Content);
-				if (fix != null)
-				{
-					//if (this.ItemsFixed.Where(z => z.ID < sub.ID).Any(z => z.Ficks > fix.Ficks)) 	{ continue;	}//if
-					//if (this.ItemsFixed.Where(z => z.ID > sub.ID).Any(z => z.Ficks < fix.Ficks)) { continue; }//if
-					sub.Ficks = fix.Ficks;
-				}//if
+				if (fix != null) { sub.Ficks = fix.Ficks; }//if
 			}//for
+		}//function
+
+
+		private static bool isGood(Sub sub)
+		{
+			if (sub == null) { return false; }
+			if (sub.Content.Length <= Settings.Instance.MinStringLength) { return false; }
+			if (!sub.Content.Any(ch => char.IsLetterOrDigit(ch))) { return false; }
+			return true;
 		}//function
 
 		public void ImportSrt(IEnumerable<string> ss)
 		{
 			Sub sub = null;
 			int Num;
+			string sText;
 			foreach (var s in ss.Where(z => z.notEmpty()))
 			{
 				if (int.TryParse(s, out Num)) //число - признак новой секции
 				{
-					if (sub != null)
+					if (isGood(sub))
 					{
 						list.Add(sub);
 					}//if
@@ -115,13 +117,20 @@ namespace Subimp
 					}//if
 					else
 					{
-						sub.Content = sub.Content.addLine(s.Trim());
+						sText = s.Trim();
+						//пустые строки игнорируем
+						if (sText.isEmpty()) { continue; }
+						//строки-примечания [dog barking] игнорируем
+						if (sText.StartsWith(S.LSquare) && sText.EndsWith(S.RSquare)) { continue; }
+						if (sText.StartsWith(S.LParenthesis) && sText.EndsWith(S.RParenthesis)) { continue; }
+						//добавляем строку к контенту субтитра
+						sub.Content = sub.Content.addLine(sText);
 					}//else
 				}//if
 			}//for
 
 			//last
-			if (sub.Content.notEmpty())
+			if (isGood(sub))
 			{
 				list.Add(sub);
 			}//if
@@ -171,6 +180,12 @@ namespace Subimp
 		{
 			IEnumerable<string> output = Items.Select(z => z.toSrt());
 			var path = io.Path.Combine(DIR.Srt, Name) + EXT.Srt;
+			if (io.File.Exists(path))
+			{
+				string pathArh = io.Path.ChangeExtension(path, EXT.Arh);
+				io.File.Delete(pathArh);
+				io.File.Move(path, pathArh);
+			}//if
 			io.File.WriteAllLines(path, output);
 		}
 
