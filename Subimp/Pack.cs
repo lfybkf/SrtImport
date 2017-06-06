@@ -218,6 +218,7 @@ namespace Subimp
 			Numerate();
 
 			Ival[] ivals = getIvals().ToArray();
+			if (ivals.Length <= 0) { return; }
 
 			foreach (var item in ivals)
 			{

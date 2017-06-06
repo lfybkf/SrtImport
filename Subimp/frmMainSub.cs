@@ -227,7 +227,7 @@ namespace Subimp
 
 		public  void Info(string s)
 		{
-			Text = "{0} {1}".fmt(s, DateTime.Now.ToShortTimeString());
+			Text = $"{s} {DateTime.Now.ToShortTimeString()}";
 		}//function
 
 		void btnSave_Click(object sender, EventArgs e)
