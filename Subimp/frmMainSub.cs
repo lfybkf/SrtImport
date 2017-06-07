@@ -62,13 +62,10 @@ namespace Subimp
 			"QUIT - сохранить экспортировать выйти",
 			string.Empty,
 			" - ini -",
-			"DirOutSrt DirOutLyr MinStringLength"
+			"DirOutSrt=C/Temp DirOutLyr=C/Temp MinStringLength=5 Exclude=exclude.txt"
 			);
 
-		void btnHelp_Click(object sender, EventArgs e)
-		{
-			MessageBox.Show(help_message);
-		}
+		void btnHelp_Click(object sender, EventArgs e) { MessageBox.Show(help_message); }
 
 		void ctlFind_KeyUp(object sender, KeyEventArgs e)
 		{
@@ -77,10 +74,7 @@ namespace Subimp
 				Sub sub = pack.Find(ctlFind.Text, SelectedSub);
 				SelectedSub = sub;
 			}//if;
-			else if (e.KeyCode == Keys.Escape)
-			{
-				listMain.Select();
-			}//if
+			else if (e.KeyCode == Keys.Escape){	listMain.Select(); }//if
 		}
 
 
@@ -213,9 +207,21 @@ namespace Subimp
 			}//if
 			#endregion
 
+			#region events
+			btnBest.KeyUp += btn_KeyUp;
+			btnDo.KeyUp += btn_KeyUp;
+			btnSave.KeyUp += btn_KeyUp;
+			btnSaveFix.KeyUp += btn_KeyUp;
+			#endregion
+
 			ListRefresh();
 
 			doStart();
+		}//func
+
+		private void btn_KeyUp(object sender, KeyEventArgs e)
+		{
+			if (e.KeyCode == Keys.Escape) { listMain.Select(); }
 		}//func
 
 		private void doStart()

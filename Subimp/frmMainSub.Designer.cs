@@ -82,7 +82,7 @@
 			this.btnHelp.Location = new System.Drawing.Point(775, 0);
 			this.btnHelp.Name = "btnHelp";
 			this.btnHelp.Size = new System.Drawing.Size(87, 38);
-			this.btnHelp.TabIndex = 3;
+			this.btnHelp.TabIndex = 7;
 			this.btnHelp.Text = "Help";
 			this.btnHelp.UseVisualStyleBackColor = true;
 			// 
@@ -92,7 +92,7 @@
 			this.ctlFind.Location = new System.Drawing.Point(862, 0);
 			this.ctlFind.Name = "ctlFind";
 			this.ctlFind.Size = new System.Drawing.Size(100, 26);
-			this.ctlFind.TabIndex = 2;
+			this.ctlFind.TabIndex = 8;
 			// 
 			// btnSave
 			// 
@@ -101,7 +101,7 @@
 			this.btnSave.Location = new System.Drawing.Point(87, 0);
 			this.btnSave.Name = "btnSave";
 			this.btnSave.Size = new System.Drawing.Size(87, 38);
-			this.btnSave.TabIndex = 1;
+			this.btnSave.TabIndex = 3;
 			this.btnSave.Text = "Save";
 			this.btnSave.UseVisualStyleBackColor = true;
 			// 
@@ -112,7 +112,7 @@
 			this.btnDo.Location = new System.Drawing.Point(0, 0);
 			this.btnDo.Name = "btnDo";
 			this.btnDo.Size = new System.Drawing.Size(87, 38);
-			this.btnDo.TabIndex = 0;
+			this.btnDo.TabIndex = 2;
 			this.btnDo.Text = "Do";
 			this.btnDo.UseVisualStyleBackColor = true;
 			// 
@@ -125,7 +125,7 @@
 			this.listMain.Location = new System.Drawing.Point(0, 0);
 			this.listMain.Name = "listMain";
 			this.listMain.Size = new System.Drawing.Size(962, 481);
-			this.listMain.TabIndex = 1;
+			this.listMain.TabIndex = 0;
 			// 
 			// frmMainSub
 			// 

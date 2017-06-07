@@ -13,6 +13,7 @@ namespace Subimp
 
 		public string DirOutSrt { get; set; } = @"C:\temp";
 		public string DirOutLyr { get; set; } = @"C:\temp";
+		public string Exclude { get; set; } = "exclude.txt";
 		public int MinStringLength { get; set; } = 5;
 	}//class
 
