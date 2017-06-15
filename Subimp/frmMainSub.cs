@@ -49,21 +49,7 @@ namespace Subimp
 			Info("save fix");
 		}
 
-		static string help_message = string.Empty.addLine(
-			" - клавиатура -",
-			"F2 - редактировать", 
-			"F3 - искать",
-			"F4 - следующий фикс",
-			"Space - кандидат",
-			"Escape - переход в список", 
-			"Delete - удалить", 
-			string.Empty, 
-			" - консольные команды -", 
-			"QUIT - сохранить экспортировать выйти",
-			string.Empty,
-			" - ini -",
-			"DirOutSrt=C/Temp DirOutLyr=C/Temp MinStringLength=5 Exclude=exclude.txt"
-			);
+		static string help_message = string.Empty;
 
 		void btnHelp_Click(object sender, EventArgs e) { MessageBox.Show(help_message); }
 
@@ -141,6 +127,10 @@ namespace Subimp
 			{
 				btnBest_Click(sender, e);
 			}//if
+			else if (e.KeyCode == Keys.D && e.Control)
+			{
+				btnDo_Click(sender, e);
+			}//if
 			else if (e.KeyCode == Keys.F2 && sub != null)
 			{
 				doEdit(sub);
@@ -170,6 +160,27 @@ namespace Subimp
 			Ini ini = Ini.Load("subimp.ini");
 			if (ini != null) { Settings.Instance = ini.DeSerialize<Settings>(); }
 			if (Settings.Instance == null) { Settings.Instance = new Settings(); }
+			#endregion
+
+			#region help
+			help_message = string.Empty.addLine(
+			" - клавиатура -",
+			"F2 - редактировать",
+			"F3 - искать",
+			"F4 - следующий фикс",
+			"Space - кандидат",
+			"Escape - переход в список",
+			"Delete - удалить",
+			string.Empty,
+			" - консольные команды -",
+			"QUIT - сохранить экспортировать выйти",
+			string.Empty,
+			" - ini -",
+			$"DirOutSrt={Settings.Instance.DirOutSrt}",
+			$"DirOutLyr={Settings.Instance.DirOutLyr}",
+			$"MinStringLength={Settings.Instance.MinStringLength}",
+			$"Exclude={Settings.Instance.Exclude}"
+			);
 			#endregion
 
 			#region args work

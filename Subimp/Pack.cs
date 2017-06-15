@@ -96,7 +96,10 @@ namespace Subimp
 			Sub sub = null;
 			int Num;
 			string sText;
-			IEnumerable<string> ssExclude = io.File.Exists(Settings.Instance.Exclude) ? io.File.ReadAllLines(Settings.Instance.Exclude) : new string[0];
+			IEnumerable<string> ssExclude = io.File.Exists(Settings.Instance.Exclude) ? 
+				io.File.ReadAllLines(Settings.Instance.Exclude).Where(z => z.notEmpty()).ToArray()
+				: new string[0];
+			string mask;
 			foreach (var s in ss.Where(z => z.notEmpty()))
 			{
 				if (int.TryParse(s, out Num)) //число - признак новой секции
@@ -125,7 +128,8 @@ namespace Subimp
 						if (sText.StartsWith(S.LSquare) && sText.EndsWith(S.RSquare)) { continue; }
 						if (sText.StartsWith(S.LParenthesis) && sText.EndsWith(S.RParenthesis)) { continue; }
 						//плохие строки
-						if (ssExclude.Contains(sText)) { continue; }
+						mask = ssExclude.FirstOrDefault(z => sText.isMasked(z));
+						if (mask.notEmpty()) { continue; }
 						//добавляем строку к контенту субтитра
 						sub.Content = sub.Content.addLine(sText);
 					}//else
