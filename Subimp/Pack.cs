@@ -23,8 +23,9 @@ namespace Subimp
 		public string Name {get;set;}
 		List<Sub> list = new List<Sub>();
 		public IEnumerable<Sub> Items { get { return list; } set { list.AddRange(value); } }
-		public IEnumerable<Sub> ItemsFixed { get { return Items.Where(z => z.HasFix); } }
-		public IEnumerable<Sub> ItemsUnFixed { get { return Items.Where(z => z.HasFix == false); } }
+		public IEnumerable<Sub> ItemsFixed => Items.Where(z => z.HasFix);
+		public IEnumerable<Sub> ItemsUnFixed => Items.Where(z => z.HasFix == false);
+		public IEnumerable<Sub> ItemsToExport => Items.FirstOrDefault()?.Content == Name ? Items : Titul.sequence(Items);
 
 		public Pack()
 		{
@@ -34,7 +35,10 @@ namespace Subimp
 		{
 			this.Name = Name;
 		}//constructor
-		
+
+		public Sub Titul => new Sub { ID = 0, Content = Name, TmBeg = new TimeSpan(0,0, Settings.Instance.TitulOffset) }.setPack(this);
+		public Sub FindOnContent(string content) => Items.FirstOrDefault(z => z.Content == content);
+
 		public void NumerateAndPack()
 		{
 			Sub sub;
@@ -185,7 +189,7 @@ namespace Subimp
 
 		internal void ExportSrt()
 		{
-			IEnumerable<string> output = Items.Select(z => z.toSrt());
+			IEnumerable<string> output = ItemsToExport.Select(z => z.toSrt());
 			var path = io.Path.Combine(DIR.Srt, Name) + EXT.Srt;
 			if (io.File.Exists(path))
 			{
@@ -198,7 +202,7 @@ namespace Subimp
 
 		internal void ExportLyr()
 		{
-			IEnumerable<string> output = Items.Select(z => z.toLyr());
+			IEnumerable<string> output = ItemsToExport.Select(z => z.toLyr());
 			var path = io.Path.Combine(DIR.Lyr, Name) + EXT.Lyr;
 			io.File.WriteAllLines(path, output);
 		}
@@ -299,9 +303,6 @@ namespace Subimp
 			*/
 		}//function
 
-		public Sub FindOnContent(string content)
-		{
-			return Items.FirstOrDefault(z => z.Content == content);
-		}//function
+
 	}//class
 }//namespace

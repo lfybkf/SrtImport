@@ -22,17 +22,10 @@ namespace Subimp
 			Content = string.Empty;
 		}//constructor
 
-		public override string ToString()
-		{
-			return "{0:D3} | {1} {2} {3}".fmt(
-				ID
-				, TmBeg.ToStr()
-				, TmFix.ToStr()
-				, Content);
-		}
+		public override string ToString() => $"{ID:D3} | {TmBeg.ToStr()} {TmFix.ToStr()} {Content}";
 
-		internal Sub Next { get { return pack.Items.SkipWhile(z => z.ID <= this.ID).FirstOrDefault(); } }
-		internal TimeSpan TmDur { get { return TmEnd - TmBeg; } }
+		internal Sub Next => pack.Items.SkipWhile(z => z.ID <= this.ID).FirstOrDefault();
+		internal TimeSpan TmDur => TmEnd - TmBeg;
 		internal TimeSpan TmEnd { 
 			get {
 				Sub next = Next;
@@ -58,7 +51,7 @@ namespace Subimp
 		public string toLyr() => $"[{TmBeg.ToStrLYR()}]{Content}";
 		public bool HasFix => Ficks > 0;
 
-		public void setPack(Pack pack) { this.pack = pack; }//function
+		public Sub setPack(Pack pack) { this.pack = pack; return this; }
 		internal void Fix()	{	this.Ticks = this.Ficks; }
 	}//class
 }//namespace

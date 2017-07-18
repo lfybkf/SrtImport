@@ -157,13 +157,11 @@ namespace Subimp
 		void frmMainSub_Load(object sender, EventArgs e)
 		{
 			#region settings
-			Ini ini = Ini.Load("subimp.ini");
-			if (ini != null) { Settings.Instance = ini.DeSerialize<Settings>(); }
-			if (Settings.Instance == null) { Settings.Instance = new Settings(); }
+			Settings.Instance = Ini.Load("subimp.ini")?.DeSerialize<Settings>();
 			#endregion
 
 			#region help
-			help_message = string.Empty.addLine(
+			help_message = Environment.NewLine.join(
 			" - клавиатура -",
 			"F2 - редактировать",
 			"F3 - искать",
@@ -171,15 +169,10 @@ namespace Subimp
 			"Space - кандидат",
 			"Escape - переход в список",
 			"Delete - удалить",
-			string.Empty,
 			" - консольные команды -",
 			"QUIT - сохранить экспортировать выйти",
-			string.Empty,
 			" - ini -",
-			$"DirOutSrt={Settings.Instance.DirOutSrt}",
-			$"DirOutLyr={Settings.Instance.DirOutLyr}",
-			$"MinStringLength={Settings.Instance.MinStringLength}",
-			$"Exclude={Settings.Instance.Exclude}"
+			Settings.Instance.ToString()
 			);
 			#endregion
 
